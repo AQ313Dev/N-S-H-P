@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ur" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nizam-ul-Sharia System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body * { visibility: hidden; }
+      #printableInvoice, #printableInvoice * { visibility: visible; }
+      #printableInvoice { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen">
+
+  <!-- TOP NAVBAR -->
+  <nav class="bg-blue-800 text-white p-4 shadow-lg flex justify-between items-center no-print">
+    <div class="flex items-center space-x-3 space-x-reverse">
+      <h1 class="text-xl font-bold" id="navTitle">نظام الشریعہ انٹری سسٹم (Nizam-ul-Sharia System)</h1>
+    </div>
+    <div class="flex items-center space-x-4 space-x-reverse">
+      <button onclick="toggleLanguage()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-1 rounded text-sm font-bold">
+        🌐 English / اردو
+      </button>
+      <span id="welcomeUser" class="hidden font-semibold text-green-300"></span>
+      <button id="logoutBtn" onclick="logout()" class="hidden bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm">Logout</button>
+    </div>
+  </nav>
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-2xl">
+      <h2 class="text-2xl font-bold text-center mb-4 text-blue-800" id="loginHeader">لاگ ان کریں (Login)</h2>
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block mb-1 font-semibold text-gray-700" id="lblUser">یوزر نیم (Username)</label>
+          <input type="text" id="username" required class="w-full border p-2 rounded focus:outline-blue-600">
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold text-gray-700" id="lblPass">پاس ورڈ (Password)</label>
+          <input type="password" id="password" required class="w-full border p-2 rounded focus:outline-blue-600">
+        </div>
+        <button type="submit" id="btnLogin" class="w-full bg-blue-800 text-white py-2 rounded font-bold hover:bg-blue-900 transition">لاگ ان (Login)</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN ENTRY FORM CONTAINER -->
+  <div id="mainContainer" class="max-w-4xl mx-auto my-8 bg-white p-8 rounded-lg shadow-md hidden no-print">
+    <h2 class="text-2xl font-bold text-blue-900 mb-6 border-b pb-2" id="formHeader">نئی ٹرانزیکشن (New Transaction Entry)</h2>
+    
+    <form id="transForm" onsubmit="handleTransactionSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1" id="lblDate">تاریخ (Date)</label>
+        <input type="date" id="txDate" required class="w-full border p-2 rounded">
+      </div>
+
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1" id="lblSubCat">ذیلی کیٹیگری (Sub Category)</label>
+        <select id="txSubCat" onchange="checkAddressRequirement()" required class="w-full border p-2 rounded">
+          <option value="">Loding Options...</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1" id="lblDept">شعبه (Department)</label>
+        <select id="txDept" required class="w-full border p-2 rounded"></select>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1" id="lblPartyType">پارٹی ٹائپ (Party Type)</label>
+        <select id="txPartyType" required class="w-full border p-2 rounded"></select>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1" id="lblAddress">پراپرٹی ایڈریس (Property Address)</label>
+        <select id="txAddress" class="w-full border p-2 rounded">
+          <option value="">Select Address (If Rent)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1" id="lblPartyName">شخص/پارٹی کا نام (Party Name)</label>
+        <input type="text" id="txPartyName" class="w-full border p-2 rounded" placeholder="Auto-fetches for Rent">
+      </div>
+
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1" id="lblPayMode">ادائیگی کا طریقہ (Payment Mode)</label>
+        <select id="txPayMode" required class="w-full border p-2 rounded"></select>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1" id="lblAmount">رقم (Amount PKR)</label>
+        <input type="number" id="txAmount" required class="w-full border p-2 rounded">
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block font-semibold text-gray-700 mb-1" id="lblRemarks">تفصیل / ریمارکس (Remarks)</label>
+        <textarea id="txRemarks" rows="2" class="w-full border p-2 rounded"></textarea>
+      </div>
+
+      <div class="md:col-span-2 mt-4">
+        <button type="submit" id="btnSubmit" class="w-full bg-green-700 text-white py-3 rounded font-bold text-lg hover:bg-green-800 transition">محفوظ کریں (Save Transaction)</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- PRINTABLE INVOICE / RECEIPT MODAL -->
+  <div id="invoiceModal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center p-4 hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-2xl">
+      <!-- Printable Box -->
+      <div id="printableInvoice" class="p-4 border-2 border-gray-800 rounded">
+        <div class="text-center border-b pb-3 mb-3">
+          <h2 class="text-2xl font-bold text-blue-900">نظام الشریعہ (Nizam-ul-Sharia)</h2>
+          <p class="text-sm font-semibold">رسید برائے ادائیگی / وصولی (Transaction Receipt)</p>
+        </div>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between"><span><strong>Receipt No:</strong> <span id="invReceiptNo"></span></span><span><strong>Date:</strong> <span id="invDate"></span></span></div>
+          <hr>
+          <div><strong>Transaction Type:</strong> <span id="invType"></span></div>
+          <div><strong>Category:</strong> <span id="invCat"></span></div>
+          <div><strong>Sub Category:</strong> <span id="invSubCat"></span></div>
+          <div><strong>Party Name:</strong> <span id="invParty"></span></div>
+          <div><strong>Amount:</strong> <span id="invAmount" class="text-lg font-bold"></span> PKR</div>
+          <div><strong>Remarks:</strong> <span id="invRemarks"></span></div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-between mt-6 no-print">
+        <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700">🖨️ پرنٹ کریں (Print)</button>
+        <button onclick="dismissInvoice()" class="bg-gray-500 text-white px-4 py-2 rounded font-bold hover:bg-gray-600">ڈسمس (Dismiss)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxhPqsZzXd3G_UlmgoiMA814M_tSHOUD-yWTelEYo1TtloIMhYCoT7grP0SVfA_TcxhlA/exec";
+    let currentUser = null;
+
+    // Fetch Dropdowns from Settings
+    function loadSettings() {
+      fetch(API_URL + "?action=getSettings")
+        .then(res => res.json())
+        .then(data => {
+          populateDropdown("txSubCat", data.subCategories);
+          populateDropdown("txDept", data.departments);
+          populateDropdown("txPartyType", data.partyTypes);
+          populateDropdown("txPayMode", data.payModes);
+          populateDropdown("txAddress", data.addresses);
+        });
+    }
+
+    function populateDropdown(id, list) {
+      const el = document.getElementById(id);
+      el.innerHTML = '<option value="">Select Option</option>';
+      list.forEach(item => { el.innerHTML += `<option value="${item}">${item}</option>`; });
+    }
+
+    // Login Handler
+    function handleLogin(e) {
+      e.preventDefault();
+      const payload = {
+        action: "login",
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value
+      };
+
+      fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(res => {
+          if(res.status === "success") {
+            currentUser = res.user;
+            document.getElementById("loginModal").classList.add("hidden");
+            document.getElementById("mainContainer").classList.remove("hidden");
+            document.getElementById("welcomeUser").classList.remove("hidden");
+            document.getElementById("logoutBtn").classList.remove("hidden");
+            document.getElementById("welcomeUser").innerText = "خوش آمدید: " + currentUser.fullName;
+            loadSettings();
+          } else {
+            alert(res.message);
+          }
+        });
+    }
+
+    // Transaction Submit Handler
+    function handleTransactionSubmit(e) {
+      e.preventDefault();
+      const data = {
+        date: document.getElementById("txDate").value,
+        subCategory: document.getElementById("txSubCat").value,
+        department: document.getElementById("txDept").value,
+        partyType: document.getElementById("txPartyType").value,
+        address: document.getElementById("txAddress").value,
+        partyName: document.getElementById("txPartyName").value,
+        payMode: document.getElementById("txPayMode").value,
+        amount: document.getElementById("txAmount").value,
+        remarks: document.getElementById("txRemarks").value,
+        userEmail: currentUser.email
+      };
+
+      fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveTransaction", data: data }) })
+        .then(res => res.json())
+        .then(res => {
+          if(res.status === "success") {
+            showInvoice(res);
+            document.getElementById("transForm").reset();
+          } else {
+            alert("Error: " + res.message);
+          }
+        });
+    }
+
+    function showInvoice(res) {
+      document.getElementById("invReceiptNo").innerText = res.receiptNo;
+      document.getElementById("invDate").innerText = res.data.date;
+      document.getElementById("invType").innerText = res.type;
+      document.getElementById("invCat").innerText = res.category;
+      document.getElementById("invSubCat").innerText = res.data.subCategory;
+      document.getElementById("invParty").innerText = res.partyName || res.data.partyName;
+      document.getElementById("invAmount").innerText = res.data.amount;
+      document.getElementById("invRemarks").innerText = res.data.remarks || "N/A";
+      document.getElementById("invoiceModal").classList.remove("hidden");
+    }
+
+    function dismissInvoice() {
+      document.getElementById("invoiceModal").classList.add("hidden");
+    }
+
+    function logout() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>
