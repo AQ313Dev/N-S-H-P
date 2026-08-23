@@ -8,20 +8,30 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Noto Nastaliq Urdu', serif, sans-serif; }
-    /* Fix for Urdu Dropdown Alignment & Line Height */
-    select {
-      direction: rtl;
-      text-align: right;
-      padding-top: 6px !important;
-      padding-bottom: 6px !important;
-      line-height: 1.6 !important;
-      appearance: auto !important;
+    .search-select-box { position: relative; }
+    .dropdown-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      background: #fff;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      display: none;
     }
-    option {
-      font-family: sans-serif; /* Clean font for options dropdown */
+    .dropdown-item {
+      padding: 8px 12px;
+      cursor: pointer;
       direction: ltr;
       text-align: left;
-      padding: 8px;
+    }
+    .dropdown-item:hover { background-color: #f3f4f6; }
+    select, input, textarea {
+      padding: 8px !important;
+      direction: ltr;
+      text-align: left;
     }
   </style>
 </head>
@@ -38,11 +48,11 @@
     <form onsubmit="handleLogin(event)">
       <div class="mb-4">
         <label class="block text-gray-700 font-bold mb-2">یوزر نیم (Username)</label>
-        <input type="text" id="username" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required dir="ltr">
+        <input type="text" id="username" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
       </div>
       <div class="mb-6">
         <label class="block text-gray-700 font-bold mb-2">پاس ورڈ (Password)</label>
-        <input type="password" id="password" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required dir="ltr">
+        <input type="password" id="password" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
       </div>
       <button type="submit" id="loginBtn" class="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800 font-bold">لاگ ان (Login)</button>
     </form>
@@ -56,60 +66,62 @@
     <form onsubmit="handleSaveTransaction(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label class="block text-gray-700 font-bold mb-1">تاریخ (Date)</label>
-        <input type="date" id="txnDate" class="w-full p-2 border rounded text-right" required dir="ltr">
+        <input type="date" id="txnDate" class="w-full border rounded" required>
       </div>
 
-      <div>
+      <!-- Searchable Sub Category Dropdown -->
+      <div class="search-select-box">
         <label class="block text-gray-700 font-bold mb-1">ذیلی کیٹیگری (Sub Category)</label>
-        <select id="subCategory" onchange="autoFillMapping()" class="w-full p-2 border rounded" required>
-          <option value="">Select Option</option>
-        </select>
+        <input type="text" id="subCategorySearch" placeholder="Type to search Sub Category..." oninput="filterSubCategory()" onfocus="showSubCatList()" class="w-full border rounded" autocomplete="off" required>
+        <input type="hidden" id="subCategory">
+        <div id="subCatList" class="dropdown-list shadow-lg rounded"></div>
       </div>
 
+      <!-- Hidden Auto-Filled Mapping Fields -->
       <input type="hidden" id="txnType">
       <input type="hidden" id="category">
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">شعبہ (Department)</label>
-        <select id="department" class="w-full p-2 border rounded" required>
-          <option value="">Select Option</option>
+        <label class="block text-gray-700 font-bold mb-1">شعبہ (Department - Col A)</label>
+        <select id="department" class="w-full border rounded" required>
+          <option value="">Select Department</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">پارٹی ٹائپ (Party Type)</label>
-        <select id="partyType" class="w-full p-2 border rounded" required>
-          <option value="">Select Option</option>
+        <label class="block text-gray-700 font-bold mb-1">پارٹی ٹائپ (Party Type - Col F)</label>
+        <select id="partyType" class="w-full border rounded" required>
+          <option value="">Select Party Type</option>
         </select>
       </div>
 
       <div>
         <label class="block text-gray-700 font-bold mb-1">پراپرٹی ایڈریس (Property Address)</label>
-        <select id="propertyAddress" class="w-full p-2 border rounded">
-          <option value="">Select Option</option>
+        <select id="propertyAddress" class="w-full border rounded">
+          <option value="">Select Address</option>
         </select>
       </div>
 
       <div>
         <label class="block text-gray-700 font-bold mb-1">شخص/پارٹی کا نام (Party Name)</label>
-        <input type="text" id="partyName" class="w-full p-2 border rounded" placeholder="Party Name" required>
+        <input type="text" id="partyName" class="w-full border rounded" placeholder="Enter Party Name" required>
       </div>
 
       <div>
         <label class="block text-gray-700 font-bold mb-1">ادائیگی کا طریقہ (Payment Mode)</label>
-        <select id="paymentMode" class="w-full p-2 border rounded" required>
-          <option value="">Select Option</option>
+        <select id="paymentMode" class="w-full border rounded" required>
+          <option value="">Select Mode</option>
         </select>
       </div>
 
       <div>
         <label class="block text-gray-700 font-bold mb-1">رقم (Amount PKR)</label>
-        <input type="number" id="amount" class="w-full p-2 border rounded" required dir="ltr">
+        <input type="number" id="amount" class="w-full border rounded" required>
       </div>
 
       <div class="md:col-span-2">
         <label class="block text-gray-700 font-bold mb-1">تفصیل / ریمارکس (Remarks)</label>
-        <textarea id="remarks" class="w-full p-2 border rounded" rows="2"></textarea>
+        <textarea id="remarks" class="w-full border rounded" rows="2"></textarea>
       </div>
 
       <div class="md:col-span-2 mt-4">
@@ -146,14 +158,7 @@
       const data = await res.json();
       
       mappingsData = data.mappings || [];
-      
-      const subCatSelect = document.getElementById("subCategory");
-      mappingsData.forEach(m => {
-        let opt = document.createElement("option");
-        opt.value = m.subCategory;
-        opt.innerText = m.subCategory;
-        subCatSelect.appendChild(opt);
-      });
+      renderSubCatList(mappingsData);
 
       populateDropdown("department", data.departments);
       populateDropdown("partyType", data.partyTypes);
@@ -164,6 +169,7 @@
     function populateDropdown(id, list) {
       const el = document.getElementById(id);
       if(!list) return;
+      el.innerHTML = '<option value="">Select Option</option>';
       list.forEach(item => {
         let opt = document.createElement("option");
         opt.value = item;
@@ -172,14 +178,42 @@
       });
     }
 
-    function autoFillMapping() {
-      const val = document.getElementById("subCategory").value;
-      const match = mappingsData.find(m => m.subCategory === val);
-      if(match) {
-        document.getElementById("txnType").value = match.txnType;
-        document.getElementById("category").value = match.category;
-      }
+    function renderSubCatList(list) {
+      const container = document.getElementById("subCatList");
+      container.innerHTML = "";
+      list.forEach(m => {
+        let div = document.createElement("div");
+        div.className = "dropdown-item";
+        div.innerText = m.subCategory;
+        div.onclick = () => selectSubCategory(m);
+        container.appendChild(div);
+      });
     }
+
+    function filterSubCategory() {
+      const query = document.getElementById("subCategorySearch").value.toLowerCase();
+      const filtered = mappingsData.filter(m => m.subCategory.toLowerCase().includes(query));
+      renderSubCatList(filtered);
+      showSubCatList();
+    }
+
+    function showSubCatList() {
+      document.getElementById("subCatList").style.display = "block";
+    }
+
+    function selectSubCategory(item) {
+      document.getElementById("subCategorySearch").value = item.subCategory;
+      document.getElementById("subCategory").value = item.subCategory;
+      document.getElementById("txnType").value = item.txnType;
+      document.getElementById("category").value = item.category;
+      document.getElementById("subCatList").style.display = "none";
+    }
+
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest(".search-select-box")) {
+        document.getElementById("subCatList").style.display = "none";
+      }
+    });
 
     async function handleSaveTransaction(e) {
       e.preventDefault();
