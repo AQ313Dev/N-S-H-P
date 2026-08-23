@@ -1,238 +1,208 @@
 <!DOCTYPE html>
-<html lang="ur" dir="ltr">
+<html lang="ur" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nizam-ul-Sharia System</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    @media print {
-      body * { visibility: hidden; }
-      #printableInvoice, #printableInvoice * { visibility: visible; }
-      #printableInvoice { position: absolute; left: 0; top: 0; width: 100%; }
-      .no-print { display: none !important; }
-    }
+    body { font-family: 'Noto Nastaliq Urdu', serif, sans-serif; }
   </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
 
-  <!-- TOP NAVBAR -->
-  <nav class="bg-blue-800 text-white p-4 shadow-lg flex justify-between items-center no-print">
-    <div class="flex items-center space-x-3 space-x-reverse">
-      <h1 class="text-xl font-bold" id="navTitle">نظام الشریعہ انٹری سسٹم (Nizam-ul-Sharia System)</h1>
-    </div>
-    <div class="flex items-center space-x-4 space-x-reverse">
-      <button onclick="toggleLanguage()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-1 rounded text-sm font-bold">
-        🌐 English / اردو
-      </button>
-      <span id="welcomeUser" class="hidden font-semibold text-green-300"></span>
-      <button id="logoutBtn" onclick="logout()" class="hidden bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm">Logout</button>
-    </div>
-  </nav>
-
-  <!-- LOGIN MODAL -->
-  <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-2xl">
-      <h2 class="text-2xl font-bold text-center mb-4 text-blue-800" id="loginHeader">لاگ ان کریں (Login)</h2>
-      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-        <div>
-          <label class="block mb-1 font-semibold text-gray-700" id="lblUser">یوزر نیم (Username)</label>
-          <input type="text" id="username" required class="w-full border p-2 rounded focus:outline-blue-600">
-        </div>
-        <div>
-          <label class="block mb-1 font-semibold text-gray-700" id="lblPass">پاس ورڈ (Password)</label>
-          <input type="password" id="password" required class="w-full border p-2 rounded focus:outline-blue-600">
-        </div>
-        <button type="submit" id="btnLogin" class="w-full bg-blue-800 text-white py-2 rounded font-bold hover:bg-blue-900 transition">لاگ ان (Login)</button>
-      </form>
-    </div>
+  <!-- Header -->
+  <div class="w-full max-w-4xl bg-blue-900 text-white p-4 rounded-t-lg shadow-md text-center text-xl font-bold mb-4">
+    نظام الشریعہ انٹری سسٹم (Nizam-ul-Sharia System)
   </div>
 
-  <!-- MAIN ENTRY FORM CONTAINER -->
-  <div id="mainContainer" class="max-w-4xl mx-auto my-8 bg-white p-8 rounded-lg shadow-md hidden no-print">
-    <h2 class="text-2xl font-bold text-blue-900 mb-6 border-b pb-2" id="formHeader">نئی ٹرانزیکشن (New Transaction Entry)</h2>
+  <!-- Login Card -->
+  <div id="loginCard" class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+    <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">لاگ ان کریں (Login)</h2>
+    <form onsubmit="handleLogin(event)">
+      <div class="mb-4">
+        <label class="block text-gray-700 font-bold mb-2">یوزر نیم (Username)</label>
+        <input type="text" id="username" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required dir="ltr">
+      </div>
+      <div class="mb-6">
+        <label class="block text-gray-700 font-bold mb-2">پاس ورڈ (Password)</label>
+        <input type="password" id="password" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required dir="ltr">
+      </div>
+      <button type="submit" id="loginBtn" class="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800 font-bold">لاگ ان (Login)</button>
+    </form>
+    <p id="loginError" class="text-red-500 text-center mt-4 hidden">غلط یوزر نیم یا پاس ورڈ!</p>
+  </div>
+
+  <!-- Main Transaction Form (Hidden Initially) -->
+  <div id="formCard" class="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl hidden">
+    <h2 class="text-2xl font-bold text-blue-900 mb-6 border-b pb-2">نئی ٹرانزیکشن (New Transaction Entry)</h2>
     
-    <form id="transForm" onsubmit="handleTransactionSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onsubmit="handleSaveTransaction(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="block font-semibold text-gray-700 mb-1" id="lblDate">تاریخ (Date)</label>
-        <input type="date" id="txDate" required class="w-full border p-2 rounded">
+        <label class="block text-gray-700 font-bold mb-1">تاریخ (Date)</label>
+        <input type="date" id="txnDate" class="w-full p-2 border rounded" required dir="ltr">
       </div>
 
       <div>
-        <label class="block font-semibold text-gray-700 mb-1" id="lblSubCat">ذیلی کیٹیگری (Sub Category)</label>
-        <select id="txSubCat" onchange="checkAddressRequirement()" required class="w-full border p-2 rounded">
-          <option value="">Loding Options...</option>
+        <label class="block text-gray-700 font-bold mb-1">ذیلی کیٹیگری (Sub Category)</label>
+        <select id="subCategory" onchange="autoFillMapping()" class="w-full p-2 border rounded" required>
+          <option value="">Select Option</option>
+        </select>
+      </div>
+
+      <!-- Hidden or Auto-Filled Readonly Fields -->
+      <input type="hidden" id="txnType">
+      <input type="hidden" id="category">
+
+      <div>
+        <label class="block text-gray-700 font-bold mb-1">شعبہ (Department)</label>
+        <select id="department" class="w-full p-2 border rounded" required>
+          <option value="">Select Option</option>
         </select>
       </div>
 
       <div>
-        <label class="block font-semibold text-gray-700 mb-1" id="lblDept">شعبه (Department)</label>
-        <select id="txDept" required class="w-full border p-2 rounded"></select>
-      </div>
-
-      <div>
-        <label class="block font-semibold text-gray-700 mb-1" id="lblPartyType">پارٹی ٹائپ (Party Type)</label>
-        <select id="txPartyType" required class="w-full border p-2 rounded"></select>
-      </div>
-
-      <div>
-        <label class="block font-semibold text-gray-700 mb-1" id="lblAddress">پراپرٹی ایڈریس (Property Address)</label>
-        <select id="txAddress" class="w-full border p-2 rounded">
-          <option value="">Select Address (If Rent)</option>
+        <label class="block text-gray-700 font-bold mb-1">پارٹی ٹائپ (Party Type)</label>
+        <select id="partyType" class="w-full p-2 border rounded" required>
+          <option value="">Select Option</option>
         </select>
       </div>
 
       <div>
-        <label class="block font-semibold text-gray-700 mb-1" id="lblPartyName">شخص/پارٹی کا نام (Party Name)</label>
-        <input type="text" id="txPartyName" class="w-full border p-2 rounded" placeholder="Auto-fetches for Rent">
+        <label class="block text-gray-700 font-bold mb-1">پراپرٹی ایڈریس (Property Address)</label>
+        <select id="propertyAddress" class="w-full p-2 border rounded">
+          <option value="">Select Option</option>
+        </select>
       </div>
 
       <div>
-        <label class="block font-semibold text-gray-700 mb-1" id="lblPayMode">ادائیگی کا طریقہ (Payment Mode)</label>
-        <select id="txPayMode" required class="w-full border p-2 rounded"></select>
+        <label class="block text-gray-700 font-bold mb-1">شخص/پارٹی کا نام (Party Name)</label>
+        <input type="text" id="partyName" class="w-full p-2 border rounded" placeholder="Party Name" required>
       </div>
 
       <div>
-        <label class="block font-semibold text-gray-700 mb-1" id="lblAmount">رقم (Amount PKR)</label>
-        <input type="number" id="txAmount" required class="w-full border p-2 rounded">
+        <label class="block text-gray-700 font-bold mb-1">ادا‎ئیگی کا طریقہ (Payment Mode)</label>
+        <select id="paymentMode" class="w-full p-2 border rounded" required>
+          <option value="">Select Option</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-bold mb-1">رقم (Amount PKR)</label>
+        <input type="number" id="amount" class="w-full p-2 border rounded" required dir="ltr">
       </div>
 
       <div class="md:col-span-2">
-        <label class="block font-semibold text-gray-700 mb-1" id="lblRemarks">تفصیل / ریمارکس (Remarks)</label>
-        <textarea id="txRemarks" rows="2" class="w-full border p-2 rounded"></textarea>
+        <label class="block text-gray-700 font-bold mb-1">تفصیل / ریمارکس (Remarks)</label>
+        <textarea id="remarks" class="w-full p-2 border rounded" rows="2"></textarea>
       </div>
 
       <div class="md:col-span-2 mt-4">
-        <button type="submit" id="btnSubmit" class="w-full bg-green-700 text-white py-3 rounded font-bold text-lg hover:bg-green-800 transition">محفوظ کریں (Save Transaction)</button>
+        <button type="submit" id="saveBtn" class="w-full bg-green-700 text-white py-3 rounded hover:bg-green-800 font-bold text-lg">محفوظ کریں (Save Transaction)</button>
       </div>
     </form>
   </div>
 
-  <!-- PRINTABLE INVOICE / RECEIPT MODAL -->
-  <div id="invoiceModal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center p-4 hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-2xl">
-      <!-- Printable Box -->
-      <div id="printableInvoice" class="p-4 border-2 border-gray-800 rounded">
-        <div class="text-center border-b pb-3 mb-3">
-          <h2 class="text-2xl font-bold text-blue-900">نظام الشریعہ (Nizam-ul-Sharia)</h2>
-          <p class="text-sm font-semibold">رسید برائے ادائیگی / وصولی (Transaction Receipt)</p>
-        </div>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between"><span><strong>Receipt No:</strong> <span id="invReceiptNo"></span></span><span><strong>Date:</strong> <span id="invDate"></span></span></div>
-          <hr>
-          <div><strong>Transaction Type:</strong> <span id="invType"></span></div>
-          <div><strong>Category:</strong> <span id="invCat"></span></div>
-          <div><strong>Sub Category:</strong> <span id="invSubCat"></span></div>
-          <div><strong>Party Name:</strong> <span id="invParty"></span></div>
-          <div><strong>Amount:</strong> <span id="invAmount" class="text-lg font-bold"></span> PKR</div>
-          <div><strong>Remarks:</strong> <span id="invRemarks"></span></div>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex justify-between mt-6 no-print">
-        <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700">🖨️ پرنٹ کریں (Print)</button>
-        <button onclick="dismissInvoice()" class="bg-gray-500 text-white px-4 py-2 rounded font-bold hover:bg-gray-600">ڈسمس (Dismiss)</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT LOGIC -->
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxhPqsZzXd3G_UlmgoiMA814M_tSHOUD-yWTelEYo1TtloIMhYCoT7grP0SVfA_TcxhlA/exec";
-    let currentUser = null;
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhPqsZzXd3G_UlmgoiMA814M_tSHOUD-yWTelEYo1TtloIMhYCoT7grP0SVfA_TcxhlA/exec"; // Replace with your Web App URL
+    let mappingsData = [];
+    let currentUser = "";
 
-    // Fetch Dropdowns from Settings
-    function loadSettings() {
-      fetch(API_URL + "?action=getSettings")
-        .then(res => res.json())
-        .then(data => {
-          populateDropdown("txSubCat", data.subCategories);
-          populateDropdown("txDept", data.departments);
-          populateDropdown("txPartyType", data.partyTypes);
-          populateDropdown("txPayMode", data.payModes);
-          populateDropdown("txAddress", data.addresses);
-        });
+    async function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+      
+      const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
+      const data = await res.json();
+      
+      if(data.status === "success") {
+        currentUser = u;
+        document.getElementById("loginCard").classList.add("hidden");
+        document.getElementById("formCard").classList.remove("hidden");
+        loadFormOptions();
+      } else {
+        document.getElementById("loginError").classList.remove("hidden");
+      }
+    }
+
+    async function loadFormOptions() {
+      const res = await fetch(`${SCRIPT_URL}?action=getSettings`);
+      const data = await res.json();
+      
+      mappingsData = data.mappings || []; // Settings mapping (B: TxnType, C: Category, D: SubCategory)
+      
+      // Populate Sub Category Dropdown
+      const subCatSelect = document.getElementById("subCategory");
+      mappingsData.forEach(m => {
+        let opt = document.createElement("option");
+        opt.value = m.subCategory;
+        opt.innerText = m.subCategory;
+        subCatSelect.appendChild(opt);
+      });
+
+      // Populate Departments, Party Types, Payment Modes
+      populateDropdown("department", data.departments);
+      populateDropdown("partyType", data.partyTypes);
+      populateDropdown("paymentMode", data.paymentModes);
+      populateDropdown("propertyAddress", data.properties);
     }
 
     function populateDropdown(id, list) {
       const el = document.getElementById(id);
-      el.innerHTML = '<option value="">Select Option</option>';
-      list.forEach(item => { el.innerHTML += `<option value="${item}">${item}</option>`; });
+      if(!list) return;
+      list.forEach(item => {
+        let opt = document.createElement("option");
+        opt.value = item;
+        opt.innerText = item;
+        el.appendChild(opt);
+      });
     }
 
-    // Login Handler
-    function handleLogin(e) {
+    function autoFillMapping() {
+      const val = document.getElementById("subCategory").value;
+      const match = mappingsData.find(m => m.subCategory === val);
+      if(match) {
+        document.getElementById("txnType").value = match.txnType;
+        document.getElementById("category").value = match.category;
+      }
+    }
+
+    async function handleSaveTransaction(e) {
       e.preventDefault();
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.disabled = true;
+      saveBtn.innerText = "محفوظ ہو رہا ہے (Saving...)";
+
       const payload = {
-        action: "login",
-        username: document.getElementById("username").value,
-        password: document.getElementById("password").value
+        date: document.getElementById("txnDate").value,
+        department: document.getElementById("department").value,
+        txnType: document.getElementById("txnType").value,
+        category: document.getElementById("category").value,
+        subCategory: document.getElementById("subCategory").value,
+        partyType: document.getElementById("partyType").value,
+        partyName: document.getElementById("partyName").value,
+        propertyAddress: document.getElementById("propertyAddress").value,
+        paymentMode: document.getElementById("paymentMode").value,
+        amount: document.getElementById("amount").value,
+        remarks: document.getElementById("remarks").value,
+        enteredBy: currentUser
       };
 
-      fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(res => {
-          if(res.status === "success") {
-            currentUser = res.user;
-            document.getElementById("loginModal").classList.add("hidden");
-            document.getElementById("mainContainer").classList.remove("hidden");
-            document.getElementById("welcomeUser").classList.remove("hidden");
-            document.getElementById("logoutBtn").classList.remove("hidden");
-            document.getElementById("welcomeUser").innerText = "خوش آمدید: " + currentUser.fullName;
-            loadSettings();
-          } else {
-            alert(res.message);
-          }
-        });
-    }
-
-    // Transaction Submit Handler
-    function handleTransactionSubmit(e) {
-      e.preventDefault();
-      const data = {
-        date: document.getElementById("txDate").value,
-        subCategory: document.getElementById("txSubCat").value,
-        department: document.getElementById("txDept").value,
-        partyType: document.getElementById("txPartyType").value,
-        address: document.getElementById("txAddress").value,
-        partyName: document.getElementById("txPartyName").value,
-        payMode: document.getElementById("txPayMode").value,
-        amount: document.getElementById("txAmount").value,
-        remarks: document.getElementById("txRemarks").value,
-        userEmail: currentUser.email
-      };
-
-      fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveTransaction", data: data }) })
-        .then(res => res.json())
-        .then(res => {
-          if(res.status === "success") {
-            showInvoice(res);
-            document.getElementById("transForm").reset();
-          } else {
-            alert("Error: " + res.message);
-          }
-        });
-    }
-
-    function showInvoice(res) {
-      document.getElementById("invReceiptNo").innerText = res.receiptNo;
-      document.getElementById("invDate").innerText = res.data.date;
-      document.getElementById("invType").innerText = res.type;
-      document.getElementById("invCat").innerText = res.category;
-      document.getElementById("invSubCat").innerText = res.data.subCategory;
-      document.getElementById("invParty").innerText = res.partyName || res.data.partyName;
-      document.getElementById("invAmount").innerText = res.data.amount;
-      document.getElementById("invRemarks").innerText = res.data.remarks || "N/A";
-      document.getElementById("invoiceModal").classList.remove("hidden");
-    }
-
-    function dismissInvoice() {
-      document.getElementById("invoiceModal").classList.add("hidden");
-    }
-
-    function logout() {
-      location.reload();
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await res.json();
+      if(data.status === "success") {
+        alert("Transaction Successfully Saved!");
+        location.reload();
+      } else {
+        alert("Error saving transaction!");
+        saveBtn.disabled = false;
+      }
     }
   </script>
 </body>
