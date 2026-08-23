@@ -3,179 +3,248 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nizam-ul-Sharia System</title>
+  <title>نظام الشریعہ انٹری سسٹم</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Noto Nastaliq Urdu', serif, sans-serif; }
-    .search-select-box { position: relative; }
+    .search-box { position: relative; }
     .dropdown-list {
-      max-height: 200px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      background: #fff;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      display: none;
+      max-height: 180px; overflow-y: auto; border: 1px solid #e5e7eb;
+      background: #fff; position: absolute; top: 100%; left: 0; right: 0; z-index: 50; display: none;
     }
-    .dropdown-item {
-      padding: 8px 12px;
-      cursor: pointer;
-      direction: ltr;
-      text-align: left;
-    }
+    .dropdown-item { padding: 8px 12px; cursor: pointer; direction: ltr; text-align: left; }
     .dropdown-item:hover { background-color: #f3f4f6; }
-    select, input, textarea {
-      padding: 8px !important;
-      direction: ltr;
-      text-align: left;
+    select, input, textarea { direction: ltr; text-align: left; }
+    @media print {
+      body * { visibility: hidden; }
+      #printableReceipt, #printableReceipt * { visibility: visible; }
+      #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; }
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-2 sm:p-6">
 
   <!-- Header -->
-  <div class="w-full max-w-4xl bg-blue-900 text-white p-4 rounded-t-lg shadow-md text-center text-xl font-bold mb-4">
+  <div class="w-full max-w-4xl bg-emerald-800 text-white p-4 rounded-t-xl shadow-lg text-center text-2xl font-bold">
     نظام الشریعہ انٹری سسٹم (Nizam-ul-Sharia System)
   </div>
 
   <!-- Login Card -->
-  <div id="loginCard" class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-    <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">لاگ ان کریں (Login)</h2>
-    <form onsubmit="handleLogin(event)">
-      <div class="mb-4">
-        <label class="block text-gray-700 font-bold mb-2">یوزر نیم (Username)</label>
-        <input type="text" id="username" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+  <div id="loginCard" class="bg-white p-8 rounded-b-xl shadow-lg w-full max-w-md">
+    <h2 class="text-xl font-bold text-center text-emerald-900 mb-6">لاگ ان کریں (Login)</h2>
+    <form onsubmit="handleLogin(event)" class="space-y-4">
+      <div>
+        <label class="block text-gray-700 font-bold mb-1">یوزر نیم</label>
+        <input type="text" id="username" class="w-full p-2 border rounded focus:ring-2 focus:ring-emerald-600" required>
       </div>
-      <div class="mb-6">
-        <label class="block text-gray-700 font-bold mb-2">پاس ورڈ (Password)</label>
-        <input type="password" id="password" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+      <div>
+        <label class="block text-gray-700 font-bold mb-1">پاس ورڈ</label>
+        <input type="password" id="password" class="w-full p-2 border rounded focus:ring-2 focus:ring-emerald-600" required>
       </div>
-      <button type="submit" id="loginBtn" class="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800 font-bold">لاگ ان (Login)</button>
+      <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-2 rounded font-bold transition">لاگ ان</button>
     </form>
-    <p id="loginError" class="text-red-500 text-center mt-4 hidden">غلط یوزر نیم یا پاس ورڈ!</p>
   </div>
 
-  <!-- Main Transaction Form -->
-  <div id="formCard" class="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl hidden">
-    <h2 class="text-2xl font-bold text-blue-900 mb-6 border-b pb-2">نئی ٹرانزیکشن (New Transaction Entry)</h2>
+  <!-- Form Card -->
+  <div id="formCard" class="bg-white p-6 rounded-b-xl shadow-lg w-full max-w-4xl hidden space-y-4">
+    <h2 class="text-xl font-bold text-emerald-900 border-b pb-2">نئی ٹرانزیکشن انٹری</h2>
     
-    <form onsubmit="handleSaveTransaction(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form id="txnForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="block text-gray-700 font-bold mb-1">تاریخ (Date)</label>
-        <input type="date" id="txnDate" class="w-full border rounded" required>
+        <label class="block text-gray-700 font-bold mb-1">1. تاریخ (Date)</label>
+        <input type="date" id="txnDate" class="w-full p-2 border rounded" required>
       </div>
 
-      <!-- Searchable Sub Category Dropdown -->
-      <div class="search-select-box">
-        <label class="block text-gray-700 font-bold mb-1">ذیلی کیٹیگری (Sub Category)</label>
-        <input type="text" id="subCategorySearch" placeholder="Type to search Sub Category..." oninput="filterSubCategory()" onfocus="showSubCatList()" class="w-full border rounded" autocomplete="off" required>
-        <input type="hidden" id="subCategory">
-        <div id="subCatList" class="dropdown-list shadow-lg rounded"></div>
-      </div>
-
-      <!-- Hidden Auto-Filled Mapping Fields -->
-      <input type="hidden" id="txnType">
-      <input type="hidden" id="category">
-
       <div>
-        <label class="block text-gray-700 font-bold mb-1">شعبہ (Department - Col A)</label>
-        <select id="department" class="w-full border rounded" required>
+        <label class="block text-gray-700 font-bold mb-1">2. شعبہ (Department)</label>
+        <select id="department" class="w-full p-2 border rounded" required>
           <option value="">Select Department</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">پارٹی ٹائپ (Party Type - Col F)</label>
-        <select id="partyType" class="w-full border rounded" required>
+        <label class="block text-gray-700 font-bold mb-1">3. ٹرانزیکشن ٹائپ (Txn Type)</label>
+        <select id="txnType" onchange="filterSubCategories()" class="w-full p-2 border rounded" required>
+          <option value="">Select Txn Type</option>
+        </select>
+      </div>
+
+      <div class="search-box">
+        <label class="block text-gray-700 font-bold mb-1">4. ذیلی کیٹیگری (Sub Category)</label>
+        <input type="text" id="subCategorySearch" placeholder="Type to search Sub Category..." oninput="filterSubCatSearch()" onfocus="showSubCatList()" class="w-full p-2 border rounded" autocomplete="off" required>
+        <input type="hidden" id="subCategory">
+        <input type="hidden" id="category">
+        <div id="subCatList" class="dropdown-list shadow-md rounded"></div>
+      </div>
+
+      <!-- Rental Conditional Fields -->
+      <div id="rentalFields" class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 bg-emerald-50 p-4 rounded-lg border border-emerald-200 hidden">
+        <div>
+          <label class="block text-emerald-900 font-bold mb-1">پراپرٹی ایڈریس (Address)</label>
+          <select id="propertyAddress" onchange="autoFillTenant()" class="w-full p-2 border rounded">
+            <option value="">Select Address</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-emerald-900 font-bold mb-1">کرایہ دار (Tenant Name)</label>
+          <input type="text" id="tenantNameDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Tenant">
+        </div>
+        <div>
+          <label class="block text-emerald-900 font-bold mb-1">کرایہ کا مہینہ (Month)</label>
+          <select id="monthOfRent" class="w-full p-2 border rounded">
+            <option value="">Select Month</option>
+            <option value="Jan-2026">Jan 2026</option>
+            <option value="Feb-2026">Feb 2026</option>
+            <option value="Mar-2026">Mar 2026</option>
+            <option value="Apr-2026">Apr 2026</option>
+            <option value="May-2026">May 2026</option>
+            <option value="Jun-2026">Jun 2026</option>
+            <option value="Jul-2026">Jul 2026</option>
+            <option value="Aug-2026">Aug 2026</option>
+            <option value="Sep-2026">Sep 2026</option>
+            <option value="Oct-2026">Oct 2026</option>
+            <option value="Nov-2026">Nov 2026</option>
+            <option value="Dec-2026">Dec 2026</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-bold mb-1">فون نمبر / Donor Search</label>
+        <input type="text" id="contactNo" onblur="lookupDonor()" class="w-full p-2 border rounded" placeholder="Type phone for Donor search">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-bold mb-1">پارٹی ٹائپ (Party Type)</label>
+        <select id="partyType" class="w-full p-2 border rounded" required>
           <option value="">Select Party Type</option>
         </select>
       </div>
 
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">پراپرٹی ایڈریس (Property Address)</label>
-        <select id="propertyAddress" class="w-full border rounded">
-          <option value="">Select Address</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">شخص/پارٹی کا نام (Party Name)</label>
-        <input type="text" id="partyName" class="w-full border rounded" placeholder="Enter Party Name" required>
+      <div class="md:col-span-2">
+        <label class="block text-gray-700 font-bold mb-1">شخص / پارٹی کا نام (Name)</label>
+        <input type="text" id="partyName" class="w-full p-2 border rounded" placeholder="Person / Party / Donor Name" required>
       </div>
 
       <div>
         <label class="block text-gray-700 font-bold mb-1">ادائیگی کا طریقہ (Payment Mode)</label>
-        <select id="paymentMode" class="w-full border rounded" required>
+        <select id="paymentMode" class="w-full p-2 border rounded" required>
           <option value="">Select Mode</option>
         </select>
       </div>
 
       <div>
         <label class="block text-gray-700 font-bold mb-1">رقم (Amount PKR)</label>
-        <input type="number" id="amount" class="w-full border rounded" required>
+        <input type="number" id="amount" class="w-full p-2 border rounded" required>
       </div>
 
       <div class="md:col-span-2">
         <label class="block text-gray-700 font-bold mb-1">تفصیل / ریمارکس (Remarks)</label>
-        <textarea id="remarks" class="w-full border rounded" rows="2"></textarea>
+        <textarea id="remarks" class="w-full p-2 border rounded" rows="2"></textarea>
       </div>
 
-      <div class="md:col-span-2 mt-4">
-        <button type="submit" id="saveBtn" class="w-full bg-green-700 text-white py-3 rounded hover:bg-green-800 font-bold text-lg">محفوظ کریں (Save Transaction)</button>
+      <div class="md:col-span-2 grid grid-cols-2 gap-4 mt-2">
+        <button type="button" onclick="submitData(false)" class="bg-emerald-700 hover:bg-emerald-800 text-white py-3 rounded font-bold">محفوظ کریں (Save Only)</button>
+        <button type="button" onclick="submitData(true)" class="bg-blue-700 hover:bg-blue-800 text-white py-3 rounded font-bold">محفوظ اور پرنٹ کریں (Save & Print)</button>
       </div>
     </form>
   </div>
 
+  <!-- Print Voucher Layout -->
+  <div id="printableReceipt" class="hidden bg-white p-6 rounded border shadow-md max-w-lg w-full text-right" dir="rtl">
+    <div class="text-center border-b pb-4 mb-4">
+      <h1 class="text-2xl font-bold text-emerald-900">نظام الشریعہ حیدرآباد</h1>
+      <p class="text-sm text-gray-600">رسید با بابت موصولی / ادائیگی</p>
+    </div>
+    <div class="flex justify-between border-b pb-2 mb-2 text-sm">
+      <span><strong>رسید نمبر:</strong> <span id="rReceiptNo"></span></span>
+      <span><strong>تاریخ:</strong> <span id="rDate"></span></span>
+    </div>
+    <div class="space-y-2 text-sm">
+      <p><strong>شعبہ:</strong> <span id="rDept"></span></p>
+      <p><strong>نام (Party/Donor):</strong> <span id="rName"></span></p>
+      <p id="rPropRow" class="hidden"><strong>پراپرٹی ایڈریس:</strong> <span id="rProp"></span> (<span id="rMonth"></span>)</p>
+      <p><strong>تفصیل / Sub Category:</strong> <span id="rSubCat"></span></p>
+      <p><strong>ادائیگی کا طریقہ:</strong> <span id="rMode"></span></p>
+      <p class="text-lg font-bold border-t pt-2 mt-2"><strong>رقم:</strong> PKR <span id="rAmount"></span></p>
+    </div>
+    <div class="mt-8 flex justify-between text-xs text-gray-500 pt-4 border-t">
+      <span>دستخط وصول کنندہ: ___________</span>
+      <span>System Generated Slip</span>
+    </div>
+  </div>
+
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhPqsZzXd3G_UlmgoiMA814M_tSHOUD-yWTelEYo1TtloIMhYCoT7grP0SVfA_TcxhlA/exec";
-    let mappingsData = [];
-    let currentUser = "";
+    let allMappings = [], filteredMappings = [], propertyMap = [], currentUser = "";
 
     async function handleLogin(e) {
       e.preventDefault();
       const u = document.getElementById("username").value;
       const p = document.getElementById("password").value;
-      
       const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
       const data = await res.json();
-      
       if(data.status === "success") {
-        currentUser = u;
+        currentUser = data.fullName || u;
         document.getElementById("loginCard").classList.add("hidden");
         document.getElementById("formCard").classList.remove("hidden");
         loadFormOptions();
-      } else {
-        document.getElementById("loginError").classList.remove("hidden");
-      }
+      } else { alert("غلط یوزر نیم یا پاس ورڈ!"); }
     }
 
     async function loadFormOptions() {
       const res = await fetch(`${SCRIPT_URL}?action=getSettings`);
       const data = await res.json();
-      
-      mappingsData = data.mappings || [];
-      renderSubCatList(mappingsData);
+      allMappings = data.mappings || [];
+      propertyMap = data.propertyTenantMap || [];
+      populateSelect("department", data.departments);
+      populateSelect("txnType", data.txnTypes);
+      populateSelect("partyType", data.partyTypes);
+      populateSelect("paymentMode", data.paymentModes);
 
-      populateDropdown("department", data.departments);
-      populateDropdown("partyType", data.partyTypes);
-      populateDropdown("paymentMode", data.paymentModes);
-      populateDropdown("propertyAddress", data.properties);
+      const propSelect = document.getElementById("propertyAddress");
+      propSelect.innerHTML = '<option value="">Select Address</option>';
+      propertyMap.forEach(p => {
+        let opt = document.createElement("option");
+        opt.value = p.address; opt.innerText = p.address;
+        propSelect.appendChild(opt);
+      });
     }
 
-    function populateDropdown(id, list) {
+    function populateSelect(id, list) {
       const el = document.getElementById(id);
-      if(!list) return;
       el.innerHTML = '<option value="">Select Option</option>';
-      list.forEach(item => {
+      if(list) list.forEach(item => {
         let opt = document.createElement("option");
-        opt.value = item;
-        opt.innerText = item;
+        opt.value = item; opt.innerText = item;
         el.appendChild(opt);
       });
+    }
+
+    async function lookupDonor() {
+      const phone = document.getElementById("contactNo").value;
+      if(phone.length > 5) {
+        const res = await fetch(`${SCRIPT_URL}?action=searchDonor&phone=${encodeURIComponent(phone)}`);
+        const data = await res.json();
+        if(data.name) document.getElementById("partyName").value = data.name;
+      }
+    }
+
+    function filterSubCategories() {
+      const selectedTxn = document.getElementById("txnType").value;
+      filteredMappings = allMappings.filter(m => m.txnType === selectedTxn);
+      document.getElementById("subCategorySearch").value = "";
+      document.getElementById("subCategory").value = "";
+      renderSubCatList(filteredMappings);
+    }
+
+    function filterSubCatSearch() {
+      const q = document.getElementById("subCategorySearch").value.toLowerCase();
+      const list = (filteredMappings.length > 0 ? filteredMappings : allMappings)
+        .filter(m => m.subCategory.toLowerCase().includes(q));
+      renderSubCatList(list);
+      showSubCatList();
     }
 
     function renderSubCatList(list) {
@@ -190,37 +259,35 @@
       });
     }
 
-    function filterSubCategory() {
-      const query = document.getElementById("subCategorySearch").value.toLowerCase();
-      const filtered = mappingsData.filter(m => m.subCategory.toLowerCase().includes(query));
-      renderSubCatList(filtered);
-      showSubCatList();
-    }
+    function showSubCatList() { document.getElementById("subCatList").style.display = "block"; }
 
-    function showSubCatList() {
-      document.getElementById("subCatList").style.display = "block";
-    }
-
-    function selectSubCategory(item) {
-      document.getElementById("subCategorySearch").value = item.subCategory;
-      document.getElementById("subCategory").value = item.subCategory;
-      document.getElementById("txnType").value = item.txnType;
-      document.getElementById("category").value = item.category;
+    function selectSubCategory(m) {
+      document.getElementById("subCategorySearch").value = m.subCategory;
+      document.getElementById("subCategory").value = m.subCategory;
+      document.getElementById("category").value = m.category;
       document.getElementById("subCatList").style.display = "none";
+
+      const rentalBox = document.getElementById("rentalFields");
+      if(m.subCategory === "Shop Rent" || m.subCategory === "Doctor Chamber Rent") {
+        rentalBox.classList.remove("hidden");
+      } else {
+        rentalBox.classList.add("hidden");
+      }
     }
 
-    document.addEventListener("click", function(e) {
-      if (!e.target.closest(".search-select-box")) {
-        document.getElementById("subCatList").style.display = "none";
+    function autoFillTenant() {
+      const addr = document.getElementById("propertyAddress").value;
+      const match = propertyMap.find(p => p.address === addr);
+      if(match) {
+        document.getElementById("tenantNameDisplay").value = match.tenantName;
+        document.getElementById("partyName").value = match.tenantName;
       }
-    });
+    }
 
-    async function handleSaveTransaction(e) {
-      e.preventDefault();
-      const saveBtn = document.getElementById("saveBtn");
-      saveBtn.disabled = true;
-      saveBtn.innerText = "محفوظ ہو رہا ہے (Saving...)";
-
+    async function submitData(shouldPrint) {
+      const remarksVal = document.getElementById("remarks").value;
+      const contactVal = document.getElementById("contactNo").value;
+      
       const payload = {
         date: document.getElementById("txnDate").value,
         department: document.getElementById("department").value,
@@ -230,24 +297,40 @@
         partyType: document.getElementById("partyType").value,
         partyName: document.getElementById("partyName").value,
         propertyAddress: document.getElementById("propertyAddress").value,
+        monthOfRent: document.getElementById("monthOfRent").value,
         paymentMode: document.getElementById("paymentMode").value,
         amount: document.getElementById("amount").value,
-        remarks: document.getElementById("remarks").value,
-        enteredBy: currentUser
+        remarks: contactVal ? `[Contact: ${contactVal}] ` + remarksVal : remarksVal,
+        enteredBy: currentUser,
+        shouldPrint: shouldPrint
       };
 
-      const res = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-      
+      const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
       const data = await res.json();
+      
       if(data.status === "success") {
-        alert("Transaction Successfully Saved!");
-        location.reload();
-      } else {
-        alert("Error saving transaction!");
-        saveBtn.disabled = false;
+        if(shouldPrint) {
+          document.getElementById("rReceiptNo").innerText = data.receiptNo;
+          document.getElementById("rDate").innerText = payload.date;
+          document.getElementById("rDept").innerText = payload.department;
+          document.getElementById("rName").innerText = payload.partyName;
+          document.getElementById("rSubCat").innerText = payload.subCategory;
+          document.getElementById("rMode").innerText = payload.paymentMode;
+          document.getElementById("rAmount").innerText = payload.amount;
+          
+          if(payload.propertyAddress) {
+            document.getElementById("rPropRow").classList.remove("hidden");
+            document.getElementById("rProp").innerText = payload.propertyAddress;
+            document.getElementById("rMonth").innerText = payload.monthOfRent;
+          }
+
+          document.getElementById("printableReceipt").classList.remove("hidden");
+          window.print();
+          location.reload();
+        } else {
+          alert("Transaction Saved Successfully! Invoice: " + data.receiptNo);
+          location.reload();
+        }
       }
     }
   </script>
