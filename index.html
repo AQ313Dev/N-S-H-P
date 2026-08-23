@@ -277,11 +277,9 @@
       let timeLeft = 5;
       document.getElementById("timerSec").innerText = timeLeft;
 
-      // Clear any previous timer if exists
       if(timerInterval) clearInterval(timerInterval);
       if(welcomeTimer) clearTimeout(welcomeTimer);
 
-      // 1 sec interval countdown
       timerInterval = setInterval(() => {
         timeLeft--;
         if(timeLeft >= 0) {
@@ -289,7 +287,6 @@
         }
       }, 1000);
 
-      // Auto hide after 5 seconds
       welcomeTimer = setTimeout(() => {
         closeWelcomeModal();
       }, 5000);
@@ -373,10 +370,18 @@
 
     async function lookupDonor() {
       const phone = document.getElementById("contactNo").value;
-      if(phone.length > 5 && !document.getElementById("contactNo").disabled) {
-        const res = await fetch(`${SCRIPT_URL}?action=searchDonor&phone=${encodeURIComponent(phone)}`);
-        const data = await res.json();
-        if(data.name) document.getElementById("partyName").value = data.name;
+      if(phone.length >= 5 && !document.getElementById("contactNo").disabled) {
+        showLoader();
+        try {
+          const res = await fetch(`${SCRIPT_URL}?action=searchDonor&phone=${encodeURIComponent(phone)}`);
+          const data = await res.json();
+          hideLoader();
+          if(data.status === "success" && data.name) {
+            document.getElementById("partyName").value = data.name;
+          }
+        } catch(e) {
+          hideLoader();
+        }
       }
     }
 
@@ -474,7 +479,8 @@
         amount: document.getElementById("amount").value,
         remarks: remarksVal,
         enteredBy: currentUser,
-        shouldPrint: shouldPrint
+        shouldPrint: shouldPrint,
+        contactNo: document.getElementById("contactNo").value
       };
 
       showLoader();
