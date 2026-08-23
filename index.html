@@ -38,7 +38,7 @@
     <div class="text-xl font-bold">نظام الشریعہ انٹری سسٹم</div>
     <div id="userProfileArea" class="hidden relative">
       <span id="welcomeMsg" class="text-sm font-semibold ml-4"></span>
-      <button onclick="toggleUserMenu()" class="bg-emerald-900 px-3 py-1 rounded text-sm hover:bg-emerald-700">⚙️ Profile</button>
+      <button onclick="toggleUserMenu()" class="bg-emerald-900 px-3 py-1 rounded text-sm hover:bg-emerald-700">⚙️ Options</button>
       <div id="userMenu" class="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-xl hidden z-50 border">
         <button onclick="showChangePassModal()" class="block w-full text-right px-4 py-2 text-sm hover:bg-gray-100 border-b">پاس ورڈ تبدیل کریں</button>
         <button onclick="logout()" class="block w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100">لاگ آؤٹ</button>
@@ -137,12 +137,7 @@
         </div>
         <div>
           <label class="block text-emerald-900 font-bold mb-1">سال (Year)</label>
-          <select id="rentYear" class="w-full p-2 border rounded">
-            <option value="2025">2025</option>
-            <option value="2026" selected>2026</option>
-            <option value="2027">2027</option>
-            <option value="2028">2028</option>
-          </select>
+          <input type="number" id="rentYear" min="2000" max="2100" placeholder="e.g. 2026" class="w-full p-2 border rounded" value="2026">
         </div>
       </div>
 
@@ -210,12 +205,17 @@
     </div>
     <div class="flex justify-between border-b pb-2 mb-2 text-sm">
       <span><strong>رسید نمبر:</strong> <span id="rReceiptNo"></span></span>
-      <span><strong>تاریخ:</strong> <span id="rDate"></span></span>
+      <span><strong>پرنٹنگ کی تاریخ و وقت:</strong> <span id="rPrintDateTime"></span></span>
     </div>
     <div id="receiptContent" class="space-y-2 text-sm"></div>
-    <div class="mt-8 flex justify-between text-xs text-gray-500 pt-4 border-t">
-      <span>دستخط وصول کنندہ: ___________</span>
-      <span>System Generated Slip</span>
+    <div class="mt-8 flex justify-between items-end text-xs text-gray-700 pt-4 border-t">
+      <div class="text-left">
+        <p><strong>انٹری کنندہ (Entered By):</strong> <span id="rEnteredBy"></span></p>
+        <p class="text-[10px] text-gray-400 mt-1">System Generated Slip</p>
+      </div>
+      <div class="text-right">
+        <p class="mb-4">دستخط وصول کنندہ: ___________________</p>
+      </div>
     </div>
   </div>
 
@@ -232,32 +232,37 @@
       const u = document.getElementById("username").value;
       const p = document.getElementById("password").value;
       
-      setTimeout(async () => {
-        try {
-          const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
-          const data = await res.json();
-          hideLoader();
-          if(data.status === "success") {
-            currentUser = data.fullName || u;
-            activeUsername = u;
-            document.getElementById("welcomeMsg").innerText = `السلام علیکم خوش آمدید، ${currentUser}`;
-            document.getElementById("userProfileArea").classList.remove("hidden");
-            document.getElementById("loginCard").classList.add("hidden");
-            document.getElementById("formCard").classList.remove("hidden");
-            document.getElementById("txnDate").valueAsDate = new Date();
-            loadFormOptions();
-          } else { alert("غلط یوزر نیم یا پاس ورڈ!"); }
-        } catch(err) { hideLoader(); alert("Error connecting to server!"); }
-      }, 1500);
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
+        const data = await res.json();
+        hideLoader();
+        if(data.status === "success") {
+          currentUser = data.fullName || u;
+          activeUsername = u;
+          document.getElementById("welcomeMsg").innerText = `السلام علیکم، ${currentUser}`;
+          document.getElementById("userProfileArea").classList.remove("hidden");
+          document.getElementById("loginCard").classList.add("hidden");
+          document.getElementById("formCard").classList.remove("hidden");
+          document.getElementById("txnDate").valueAsDate = new Date();
+          loadFormOptions();
+        } else { alert("غلط یوزر نیم یا پاس ورڈ!"); }
+      } catch(err) { hideLoader(); alert("Error connecting to server!"); }
     }
 
     async function handleForgotPass() {
       const u = prompt("اپنا یوزر نیم درج کریں:");
       if(u) {
         showLoader();
-        await fetch(`${SCRIPT_URL}?action=forgotPassword&username=${encodeURIComponent(u)}`);
-        hideLoader();
-        alert("پاس ورڈ ری سیٹ کی درخواست ایڈمن کو ای میل کر دی گئی ہے۔");
+        try {
+          const res = await fetch(`${SCRIPT_URL}?action=forgotPassword&username=${encodeURIComponent(u)}`);
+          const data = await res.json();
+          hideLoader();
+          if(data.status === "success") {
+            alert("پاس ورڈ ری سیٹ کی درخواست ای میل کر دی گئی ہے۔");
+          } else {
+            alert("ای میل بھیجنے میں مسئلہ آیا: " + data.message);
+          }
+        } catch(e) { hideLoader(); alert("Error processing request!"); }
       }
     }
 
@@ -391,8 +396,13 @@
       const subCat = document.getElementById("subCategory").value;
       const isRent = (subCat === "Shop Rent" || subCat === "Doctor Chamber Rent");
       const monthVal = document.getElementById("rentMonth").value;
-      const yearVal = document.getElementById("rentYear").value;
-      
+      let yearVal = document.getElementById("rentYear").value;
+
+      if(isRent && (!yearVal || isNaN(yearVal) || yearVal.length !== 4)) {
+        alert("برائے مہربانی درست سال درج کریں (مثلاً 2026)");
+        return;
+      }
+
       const payload = {
         date: document.getElementById("txnDate").value,
         department: document.getElementById("department").value,
@@ -418,12 +428,14 @@
       if(data.status === "success") {
         if(shouldPrint) {
           document.getElementById("rReceiptNo").innerText = data.receiptNo;
-          document.getElementById("rDate").innerText = payload.date;
-          
+          document.getElementById("rPrintDateTime").innerText = data.printDateTime;
+          document.getElementById("rEnteredBy").innerText = currentUser;
+
           let contentHtml = "";
           if(isRent) {
             document.getElementById("receiptTitle").innerText = "کرایہ داری موصولی رسید (Rent Receipt)";
             contentHtml = `
+              <p><strong>تاریخ ٹرانزیکشن:</strong> ${payload.date}</p>
               <p><strong>نام کرایہ دار:</strong> ${payload.partyName}</p>
               <p><strong>ولدیت:</strong> ${document.getElementById("tenantFatherDisplay").value}</p>
               <p><strong>CNIC / Contact:</strong> ${document.getElementById("tenantCnicDisplay").value} / ${document.getElementById("tenantContactDisplay").value}</p>
@@ -436,6 +448,7 @@
           } else {
             document.getElementById("receiptTitle").innerText = "رسید با بابت موصولی / ادائیگی";
             contentHtml = `
+              <p><strong>تاریخ ٹرانزیکشن:</strong> ${payload.date}</p>
               <p><strong>شعبہ:</strong> ${payload.department}</p>
               <p><strong>نام (Party/Donor):</strong> ${payload.partyName}</p>
               <p><strong>تفصیل / Sub Category:</strong> ${payload.subCategory}</p>
@@ -460,6 +473,7 @@
       document.getElementById("rentalFields").classList.add("hidden");
       document.getElementById("contactNo").disabled = false;
       document.getElementById("txnDate").valueAsDate = new Date();
+      document.getElementById("rentYear").value = "2026";
     }
   </script>
 </body>
