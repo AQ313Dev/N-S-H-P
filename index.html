@@ -18,11 +18,11 @@
       top: 100%; 
       left: 0; 
       right: 0; 
-      z-index: 50; 
+      z-index: 999; 
       display: none;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
-    .dropdown-item { padding: 8px 12px; cursor: pointer; direction: ltr; text-align: left; }
+    .dropdown-item { padding: 8px 12px; cursor: pointer; text-align: right; }
     .dropdown-item:hover { background-color: #f3f4f6; }
     select, input, textarea { direction: ltr; text-align: left; }
     @media print {
@@ -426,7 +426,6 @@
 
     function showSubCatList() { document.getElementById("subCatList").style.display = "block"; }
 
-    // Close dropdown on outside click
     document.addEventListener("click", function(e) {
       if (!e.target.closest(".search-box")) {
         document.getElementById("subCatList").style.display = "none";
@@ -534,31 +533,25 @@
             contentHtml = `
               <p><strong>تاریخ ٹرانزیکشن:</strong> ${payload.date}</p>
               <p><strong>شعبہ:</strong> ${payload.department}</p>
-              <p><strong>نام (Donor / Person):</strong> ${payload.partyName}</p>
-              <p><strong>ذیلی کیٹیگری (Sub Category):</strong> ${payload.subCategory}</p>
+              <p><strong>نام/پارٹی:</strong> ${payload.partyName}</p>
+              <p><strong>وصول شدہ رقم:</strong> PKR ${payload.amount}</p>
               <p><strong>ادائیگی کا طریقہ:</strong> ${payload.paymentMode}</p>
               ${remarksHtml}
-              <p class="text-lg font-bold border-t pt-2 mt-2"><strong>رقم:</strong> PKR ${payload.amount}</p>
             `;
           }
 
           document.getElementById("receiptContent").innerHTML = contentHtml;
           document.getElementById("printableReceipt").classList.remove("hidden");
           window.print();
-          resetForm();
+          document.getElementById("printableReceipt").classList.add("hidden");
         } else {
-          alert("Transaction Saved Successfully! Invoice: " + data.receiptNo);
-          resetForm();
+          alert("انٹری کامیابی سے محفوظ ہو گئی ہے!");
         }
+        document.getElementById("txnForm").reset();
+        document.getElementById("rentalFields").classList.add("hidden");
+      } else {
+        alert("مسئلہ آیا: " + data.message);
       }
-    }
-
-    function resetForm() {
-      document.getElementById("txnForm").reset();
-      document.getElementById("rentalFields").classList.add("hidden");
-      document.getElementById("contactNo").disabled = false;
-      document.getElementById("txnDate").valueAsDate = new Date();
-      document.getElementById("rentYear").value = "2026";
     }
   </script>
 </body>
