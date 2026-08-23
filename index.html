@@ -23,11 +23,27 @@
     }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-2 sm:p-6">
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-start p-2 sm:p-6">
+
+  <!-- Loader overlay -->
+  <div id="loader" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-xl text-center space-y-3">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-800 mx-auto"></div>
+      <p class="text-emerald-900 font-bold">برائے مہربانی انتظار کریں...</p>
+    </div>
+  </div>
 
   <!-- Header -->
-  <div class="w-full max-w-4xl bg-emerald-800 text-white p-4 rounded-t-xl shadow-lg text-center text-2xl font-bold">
-    نظام الشریعہ انٹری سسٹم (Nizam-ul-Sharia System)
+  <div class="w-full max-w-4xl bg-emerald-800 text-white p-4 rounded-t-xl shadow-lg flex justify-between items-center">
+    <div class="text-xl font-bold">نظام الشریعہ انٹری سسٹم</div>
+    <div id="userProfileArea" class="hidden relative">
+      <span id="welcomeMsg" class="text-sm font-semibold ml-4"></span>
+      <button onclick="toggleUserMenu()" class="bg-emerald-900 px-3 py-1 rounded text-sm hover:bg-emerald-700">⚙️ Profile</button>
+      <div id="userMenu" class="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-xl hidden z-50 border">
+        <button onclick="showChangePassModal()" class="block w-full text-right px-4 py-2 text-sm hover:bg-gray-100 border-b">پاس ورڈ تبدیل کریں</button>
+        <button onclick="logout()" class="block w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100">لاگ آؤٹ</button>
+      </div>
+    </div>
   </div>
 
   <!-- Login Card -->
@@ -36,17 +52,20 @@
     <form onsubmit="handleLogin(event)" class="space-y-4">
       <div>
         <label class="block text-gray-700 font-bold mb-1">یوزر نیم</label>
-        <input type="text" id="username" class="w-full p-2 border rounded focus:ring-2 focus:ring-emerald-600" required>
+        <input type="text" id="username" class="w-full p-2 border rounded" required>
       </div>
       <div>
         <label class="block text-gray-700 font-bold mb-1">پاس ورڈ</label>
-        <input type="password" id="password" class="w-full p-2 border rounded focus:ring-2 focus:ring-emerald-600" required>
+        <input type="password" id="password" class="w-full p-2 border rounded" required>
       </div>
-      <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-2 rounded font-bold transition">لاگ ان</button>
+      <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-2 rounded font-bold">لاگ ان</button>
+      <div class="text-center mt-2">
+        <button type="button" onclick="handleForgotPass()" class="text-xs text-blue-600 underline">پاس ورڈ بھول گئے؟ (Forgot Password)</button>
+      </div>
     </form>
   </div>
 
-  <!-- Form Card -->
+  <!-- Main Entry Form -->
   <div id="formCard" class="bg-white p-6 rounded-b-xl shadow-lg w-full max-w-4xl hidden space-y-4">
     <h2 class="text-xl font-bold text-emerald-900 border-b pb-2">نئی ٹرانزیکشن انٹری</h2>
     
@@ -78,7 +97,7 @@
         <div id="subCatList" class="dropdown-list shadow-md rounded"></div>
       </div>
 
-      <!-- Rental Conditional Fields -->
+      <!-- Rental Section -->
       <div id="rentalFields" class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 bg-emerald-50 p-4 rounded-lg border border-emerald-200 hidden">
         <div>
           <label class="block text-emerald-900 font-bold mb-1">پراپرٹی ایڈریس (Address)</label>
@@ -91,21 +110,38 @@
           <input type="text" id="tenantNameDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Tenant">
         </div>
         <div>
+          <label class="block text-emerald-900 font-bold mb-1">ولدیت (Father Name)</label>
+          <input type="text" id="tenantFatherDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Father">
+        </div>
+        <div>
+          <label class="block text-emerald-900 font-bold mb-1">CNIC</label>
+          <input type="text" id="tenantCnicDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto CNIC">
+        </div>
+        <div>
+          <label class="block text-emerald-900 font-bold mb-1">Contact</label>
+          <input type="text" id="tenantContactDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Contact">
+        </div>
+        <div>
+          <label class="block text-emerald-900 font-bold mb-1">ماہانہ طے شدہ کرایہ</label>
+          <input type="text" id="tenantRentDisplay" class="w-full p-2 border rounded bg-gray-100 font-bold text-emerald-800" readonly placeholder="0">
+        </div>
+        <div>
           <label class="block text-emerald-900 font-bold mb-1">کرایہ کا مہینہ (Month)</label>
-          <select id="monthOfRent" class="w-full p-2 border rounded">
+          <select id="rentMonth" class="w-full p-2 border rounded">
             <option value="">Select Month</option>
-            <option value="Jan-2026">Jan 2026</option>
-            <option value="Feb-2026">Feb 2026</option>
-            <option value="Mar-2026">Mar 2026</option>
-            <option value="Apr-2026">Apr 2026</option>
-            <option value="May-2026">May 2026</option>
-            <option value="Jun-2026">Jun 2026</option>
-            <option value="Jul-2026">Jul 2026</option>
-            <option value="Aug-2026">Aug 2026</option>
-            <option value="Sep-2026">Sep 2026</option>
-            <option value="Oct-2026">Oct 2026</option>
-            <option value="Nov-2026">Nov 2026</option>
-            <option value="Dec-2026">Dec 2026</option>
+            <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
+            <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
+            <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
+            <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-emerald-900 font-bold mb-1">سال (Year)</label>
+          <select id="rentYear" class="w-full p-2 border rounded">
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
           </select>
         </div>
       </div>
@@ -135,7 +171,7 @@
       </div>
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">رقم (Amount PKR)</label>
+        <label class="block text-gray-700 font-bold mb-1">وصول شدہ رقم (Paid Amount PKR)</label>
         <input type="number" id="amount" class="w-full p-2 border rounded" required>
       </div>
 
@@ -151,24 +187,32 @@
     </form>
   </div>
 
-  <!-- Print Voucher Layout -->
+  <!-- Change Password Modal -->
+  <div id="changePassModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm space-y-4 text-right">
+      <h3 class="text-lg font-bold border-b pb-2">پاس ورڈ تبدیل کریں</h3>
+      <div>
+        <label class="block text-xs font-bold mb-1">نیا پاس ورڈ</label>
+        <input type="password" id="newPassword" class="w-full p-2 border rounded">
+      </div>
+      <div class="flex justify-end gap-2">
+        <button onclick="hideChangePassModal()" class="px-3 py-1 bg-gray-300 rounded">کینسل</button>
+        <button onclick="submitNewPassword()" class="px-3 py-1 bg-emerald-700 text-white rounded">اپڈیٹ کریں</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Receipt Template -->
   <div id="printableReceipt" class="hidden bg-white p-6 rounded border shadow-md max-w-lg w-full text-right" dir="rtl">
     <div class="text-center border-b pb-4 mb-4">
       <h1 class="text-2xl font-bold text-emerald-900">نظام الشریعہ حیدرآباد</h1>
-      <p class="text-sm text-gray-600">رسید با بابت موصولی / ادائیگی</p>
+      <p class="text-sm text-gray-600" id="receiptTitle">رسید با بابت موصولی / ادائیگی</p>
     </div>
     <div class="flex justify-between border-b pb-2 mb-2 text-sm">
       <span><strong>رسید نمبر:</strong> <span id="rReceiptNo"></span></span>
       <span><strong>تاریخ:</strong> <span id="rDate"></span></span>
     </div>
-    <div class="space-y-2 text-sm">
-      <p><strong>شعبہ:</strong> <span id="rDept"></span></p>
-      <p><strong>نام (Party/Donor):</strong> <span id="rName"></span></p>
-      <p id="rPropRow" class="hidden"><strong>پراپرٹی ایڈریس:</strong> <span id="rProp"></span> (<span id="rMonth"></span>)</p>
-      <p><strong>تفصیل / Sub Category:</strong> <span id="rSubCat"></span></p>
-      <p><strong>ادائیگی کا طریقہ:</strong> <span id="rMode"></span></p>
-      <p class="text-lg font-bold border-t pt-2 mt-2"><strong>رقم:</strong> PKR <span id="rAmount"></span></p>
-    </div>
+    <div id="receiptContent" class="space-y-2 text-sm"></div>
     <div class="mt-8 flex justify-between text-xs text-gray-500 pt-4 border-t">
       <span>دستخط وصول کنندہ: ___________</span>
       <span>System Generated Slip</span>
@@ -177,20 +221,68 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhPqsZzXd3G_UlmgoiMA814M_tSHOUD-yWTelEYo1TtloIMhYCoT7grP0SVfA_TcxhlA/exec";
-    let allMappings = [], filteredMappings = [], propertyMap = [], currentUser = "";
+    let allMappings = [], filteredMappings = [], propertyMap = [], currentUser = "", activeUsername = "";
+
+    function showLoader() { document.getElementById("loader").classList.remove("hidden"); }
+    function hideLoader() { document.getElementById("loader").classList.add("hidden"); }
 
     async function handleLogin(e) {
       e.preventDefault();
+      showLoader();
       const u = document.getElementById("username").value;
       const p = document.getElementById("password").value;
-      const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
-      const data = await res.json();
-      if(data.status === "success") {
-        currentUser = data.fullName || u;
-        document.getElementById("loginCard").classList.add("hidden");
-        document.getElementById("formCard").classList.remove("hidden");
-        loadFormOptions();
-      } else { alert("غلط یوزر نیم یا پاس ورڈ!"); }
+      
+      setTimeout(async () => {
+        try {
+          const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
+          const data = await res.json();
+          hideLoader();
+          if(data.status === "success") {
+            currentUser = data.fullName || u;
+            activeUsername = u;
+            document.getElementById("welcomeMsg").innerText = `السلام علیکم خوش آمدید، ${currentUser}`;
+            document.getElementById("userProfileArea").classList.remove("hidden");
+            document.getElementById("loginCard").classList.add("hidden");
+            document.getElementById("formCard").classList.remove("hidden");
+            document.getElementById("txnDate").valueAsDate = new Date();
+            loadFormOptions();
+          } else { alert("غلط یوزر نیم یا پاس ورڈ!"); }
+        } catch(err) { hideLoader(); alert("Error connecting to server!"); }
+      }, 1500);
+    }
+
+    async function handleForgotPass() {
+      const u = prompt("اپنا یوزر نیم درج کریں:");
+      if(u) {
+        showLoader();
+        await fetch(`${SCRIPT_URL}?action=forgotPassword&username=${encodeURIComponent(u)}`);
+        hideLoader();
+        alert("پاس ورڈ ری سیٹ کی درخواست ایڈمن کو ای میل کر دی گئی ہے۔");
+      }
+    }
+
+    function toggleUserMenu() {
+      document.getElementById("userMenu").classList.toggle("hidden");
+    }
+
+    function showChangePassModal() { toggleUserMenu(); document.getElementById("changePassModal").classList.remove("hidden"); }
+    function hideChangePassModal() { document.getElementById("changePassModal").classList.add("hidden"); }
+
+    async function submitNewPassword() {
+      const newP = document.getElementById("newPassword").value;
+      if(!newP) return;
+      showLoader();
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "changePassword", username: activeUsername, newPassword: newP })
+      });
+      hideLoader();
+      hideChangePassModal();
+      alert("پاس ورڈ کامیابی سے تبدیل ہو گیا ہے!");
+    }
+
+    function logout() {
+      location.reload();
     }
 
     async function loadFormOptions() {
@@ -224,7 +316,7 @@
 
     async function lookupDonor() {
       const phone = document.getElementById("contactNo").value;
-      if(phone.length > 5) {
+      if(phone.length > 5 && !document.getElementById("contactNo").disabled) {
         const res = await fetch(`${SCRIPT_URL}?action=searchDonor&phone=${encodeURIComponent(phone)}`);
         const data = await res.json();
         if(data.name) document.getElementById("partyName").value = data.name;
@@ -268,10 +360,17 @@
       document.getElementById("subCatList").style.display = "none";
 
       const rentalBox = document.getElementById("rentalFields");
+      const phoneInput = document.getElementById("contactNo");
+      const partyTypeSelect = document.getElementById("partyType");
+
       if(m.subCategory === "Shop Rent" || m.subCategory === "Doctor Chamber Rent") {
         rentalBox.classList.remove("hidden");
+        phoneInput.disabled = true;
+        phoneInput.value = "";
+        partyTypeSelect.value = "Tenant";
       } else {
         rentalBox.classList.add("hidden");
+        phoneInput.disabled = false;
       }
     }
 
@@ -280,58 +379,87 @@
       const match = propertyMap.find(p => p.address === addr);
       if(match) {
         document.getElementById("tenantNameDisplay").value = match.tenantName;
+        document.getElementById("tenantFatherDisplay").value = match.fatherName;
+        document.getElementById("tenantCnicDisplay").value = match.cnic;
+        document.getElementById("tenantContactDisplay").value = match.contact;
+        document.getElementById("tenantRentDisplay").value = match.monthlyRent;
         document.getElementById("partyName").value = match.tenantName;
       }
     }
 
     async function submitData(shouldPrint) {
-      const remarksVal = document.getElementById("remarks").value;
-      const contactVal = document.getElementById("contactNo").value;
+      const subCat = document.getElementById("subCategory").value;
+      const isRent = (subCat === "Shop Rent" || subCat === "Doctor Chamber Rent");
+      const monthVal = document.getElementById("rentMonth").value;
+      const yearVal = document.getElementById("rentYear").value;
       
       const payload = {
         date: document.getElementById("txnDate").value,
         department: document.getElementById("department").value,
         txnType: document.getElementById("txnType").value,
         category: document.getElementById("category").value,
-        subCategory: document.getElementById("subCategory").value,
+        subCategory: subCat,
         partyType: document.getElementById("partyType").value,
         partyName: document.getElementById("partyName").value,
-        propertyAddress: document.getElementById("propertyAddress").value,
-        monthOfRent: document.getElementById("monthOfRent").value,
+        propertyAddress: isRent ? document.getElementById("propertyAddress").value : "",
+        rentMonthYear: isRent ? `${monthVal}-${yearVal}` : "",
         paymentMode: document.getElementById("paymentMode").value,
         amount: document.getElementById("amount").value,
-        remarks: contactVal ? `[Contact: ${contactVal}] ` + remarksVal : remarksVal,
+        remarks: document.getElementById("remarks").value,
         enteredBy: currentUser,
         shouldPrint: shouldPrint
       };
 
+      showLoader();
       const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
       const data = await res.json();
+      hideLoader();
       
       if(data.status === "success") {
         if(shouldPrint) {
           document.getElementById("rReceiptNo").innerText = data.receiptNo;
           document.getElementById("rDate").innerText = payload.date;
-          document.getElementById("rDept").innerText = payload.department;
-          document.getElementById("rName").innerText = payload.partyName;
-          document.getElementById("rSubCat").innerText = payload.subCategory;
-          document.getElementById("rMode").innerText = payload.paymentMode;
-          document.getElementById("rAmount").innerText = payload.amount;
           
-          if(payload.propertyAddress) {
-            document.getElementById("rPropRow").classList.remove("hidden");
-            document.getElementById("rProp").innerText = payload.propertyAddress;
-            document.getElementById("rMonth").innerText = payload.monthOfRent;
+          let contentHtml = "";
+          if(isRent) {
+            document.getElementById("receiptTitle").innerText = "کرایہ داری موصولی رسید (Rent Receipt)";
+            contentHtml = `
+              <p><strong>نام کرایہ دار:</strong> ${payload.partyName}</p>
+              <p><strong>ولدیت:</strong> ${document.getElementById("tenantFatherDisplay").value}</p>
+              <p><strong>CNIC / Contact:</strong> ${document.getElementById("tenantCnicDisplay").value} / ${document.getElementById("tenantContactDisplay").value}</p>
+              <p><strong>پراپرٹی ایڈریس:</strong> ${payload.propertyAddress}</p>
+              <p><strong>کرایہ کا مہینہ / سال:</strong> ${payload.rentMonthYear}</p>
+              <p><strong>طے شدہ ماہانہ کرایہ:</strong> PKR ${document.getElementById("tenantRentDisplay").value}</p>
+              <p><strong>وصول شدہ رقم:</strong> PKR ${payload.amount}</p>
+              <p><strong>ادائیگی کا طریقہ:</strong> ${payload.paymentMode}</p>
+            `;
+          } else {
+            document.getElementById("receiptTitle").innerText = "رسید با بابت موصولی / ادائیگی";
+            contentHtml = `
+              <p><strong>شعبہ:</strong> ${payload.department}</p>
+              <p><strong>نام (Party/Donor):</strong> ${payload.partyName}</p>
+              <p><strong>تفصیل / Sub Category:</strong> ${payload.subCategory}</p>
+              <p><strong>ادائیگی کا طریقہ:</strong> ${payload.paymentMode}</p>
+              <p class="text-lg font-bold border-t pt-2 mt-2"><strong>رقم:</strong> PKR ${payload.amount}</p>
+            `;
           }
 
+          document.getElementById("receiptContent").innerHTML = contentHtml;
           document.getElementById("printableReceipt").classList.remove("hidden");
           window.print();
-          location.reload();
+          resetForm();
         } else {
           alert("Transaction Saved Successfully! Invoice: " + data.receiptNo);
-          location.reload();
+          resetForm();
         }
       }
+    }
+
+    function resetForm() {
+      document.getElementById("txnForm").reset();
+      document.getElementById("rentalFields").classList.add("hidden");
+      document.getElementById("contactNo").disabled = false;
+      document.getElementById("txnDate").valueAsDate = new Date();
     }
   </script>
 </body>
