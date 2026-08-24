@@ -26,17 +26,8 @@
     .dropdown-item:hover { background-color: #f3f4f6; }
     select, input, textarea { direction: ltr; text-align: left; }
 
+    /* Purane print rules fix */
     @media print {
-      @page {
-        size: A4 portrait;
-        margin: 5mm;
-      }
-      html, body {
-        height: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-      }
       body * {
         visibility: hidden;
       }
@@ -48,11 +39,11 @@
         left: 0;
         top: 0;
         width: 100% !important;
-        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 10px !important;
         box-shadow: none !important;
-        border: 1px solid #ccc !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
+        border: 1px solid #333 !important;
+        display: block !important;
       }
     }
   </style>
@@ -69,7 +60,7 @@
 
   <!-- Welcome Popup Modal -->
   <div id="welcomeModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center border-2 border-emerald-600 transform transition-all scale-100 space-y-4 relative">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center border-2 border-emerald-600 space-y-4 relative">
       <button onclick="closeWelcomeModal()" class="absolute top-3 left-3 text-gray-400 hover:text-gray-700 font-bold text-lg px-2">✕</button>
       <div class="text-4xl text-emerald-800 font-bold mb-2">السلام علیکم</div>
       <div id="modalUserName" class="text-2xl font-bold text-gray-800 border-b pb-3"></div>
@@ -140,7 +131,6 @@
         </select>
       </div>
 
-      <!-- Category Dropdown Field -->
       <div id="categoryContainer">
         <label class="block text-gray-700 font-bold mb-1">4. کیٹیگری (Category) <span id="catRequiredStar" class="text-red-500 hidden">*</span></label>
         <select id="categorySelect" onchange="onCategoryChange()" class="w-full p-2 border rounded">
@@ -256,7 +246,7 @@
     </div>
   </div>
 
-  <!-- Dynamic Receipt Template -->
+  <!-- Dynamic Receipt Template (Purana Visual Template) -->
   <div id="printableReceipt" class="hidden bg-white p-6 rounded border shadow-md max-w-lg w-full text-right" dir="rtl">
     <div class="text-center border-b pb-3 mb-4 space-y-2">
       <h1 class="text-3xl font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
@@ -428,14 +418,12 @@
       }
     }
 
-    // Handles logic when Transaction Type changes
     function onTxnTypeChange() {
       const selectedTxn = document.getElementById("txnType").value;
       const categorySelect = document.getElementById("categorySelect");
       const catRequiredStar = document.getElementById("catRequiredStar");
       const phoneInput = document.getElementById("contactNo");
 
-      // Reset values
       categorySelect.value = "";
       document.getElementById("subCategorySearch").value = "";
       document.getElementById("subCategory").value = "";
@@ -444,13 +432,11 @@
       const isExpense = selectedTxn.toLowerCase().includes("expense") || selectedTxn.toLowerCase().includes("اخراجات");
 
       if (isExpense) {
-        // Expense Case: Mandatory Category Selection & Disable Donor Search
         categorySelect.required = true;
         catRequiredStar.classList.remove("hidden");
         phoneInput.disabled = true;
         phoneInput.value = "";
 
-        // Populate unique categories related to Expense
         const expenseCategories = Array.from(new Set(
           allMappings.filter(m => m.txnType.toLowerCase().includes("expense") || m.txnType.toLowerCase().includes("اخراجات"))
                      .map(m => m.category)
@@ -459,12 +445,10 @@
         populateSelect("categorySelect", expenseCategories);
         filteredMappings = [];
       } else {
-        // Income / Other Cases
         categorySelect.required = false;
         catRequiredStar.classList.add("hidden");
         phoneInput.disabled = false;
 
-        // Populate Categories if available
         const txnCategories = Array.from(new Set(
           allMappings.filter(m => m.txnType === selectedTxn).map(m => m.category).filter(Boolean)
         ));
@@ -475,7 +459,6 @@
       renderSubCatList(filteredMappings);
     }
 
-    // Filter Sub Categories when Category is selected
     function onCategoryChange() {
       const selectedTxn = document.getElementById("txnType").value;
       const selectedCat = document.getElementById("categorySelect").value;
@@ -634,7 +617,11 @@
           `;
 
           document.getElementById("receiptContent").innerHTML = contentHtml;
+          
+          const receiptEl = document.getElementById("printableReceipt");
+          receiptEl.classList.remove("hidden");
           window.print();
+          receiptEl.classList.add("hidden");
         } else {
           alert("انٹری کامیابی سے محفوظ ہو گئی ہے!");
         }
