@@ -535,7 +535,7 @@
           document.getElementById("rPrintDateTime").innerText = data.printDateTime;
           document.getElementById("rEnteredBy").innerText = currentUser;
 
-          // Rent vs Expense vs Normal Title Logic
+          // Title Logic
           if (isRent) {
             document.getElementById("receiptTitle").innerText = "رسید بابت ماہانہ کرایہ";
           } else if (isExpense) {
@@ -544,7 +544,10 @@
             document.getElementById("receiptTitle").innerText = "رسید بابت موصولی";
           }
 
-          const remarksHtml = remarksVal ? `<p><strong>تفصیل / ریمارکس:</strong> ${remarksVal}</p>` : `<p><strong>تفصیل / رymارکس:</strong> -</p>`;
+          const remarksHtml = remarksVal ? `<p><strong>تفصیل / ریمارکس:</strong> ${remarksVal}</p>` : `<p><strong>تفصیل / ریمارکس:</strong> -</p>`;
+
+          // Label Logic for Income vs Expense
+          const partyLabel = isExpense ? "نام (Paid To)" : "نام (Received From)";
 
           let contentHtml = "";
           if(isRent) {
@@ -564,7 +567,7 @@
             contentHtml = `
               <p><strong>تاریخ ٹرانزیکشن:</strong> ${payload.date}</p>
               <p><strong>شعبہ:</strong> ${payload.department}</p>
-              <p><strong>نام (Donor / Person):</strong> ${payload.partyName}</p>
+              <p><strong>${partyLabel}:</strong> ${payload.partyName}</p>
               <p><strong>ذیلی کیٹیگری (Sub Category):</strong> ${payload.subCategory}</p>
               <p><strong>ادائیگی کا طریقہ:</strong> ${payload.paymentMode}</p>
               ${remarksHtml}
