@@ -26,7 +26,7 @@
     .dropdown-item:hover { background-color: #f3f4f6; }
     select, input, textarea { direction: ltr; text-align: left; }
 
-    /* --- PRINT SETTINGS FOR SINGLE PAGE FIT --- */
+    /* PRINT SETTINGS FOR SINGLE PAGE FIT */
     @media print {
       @page {
         size: A4 portrait;
@@ -68,7 +68,7 @@
     </div>
   </div>
 
-  <!-- Welcome Popup Modal with Auto Timer & Skip -->
+  <!-- Welcome Popup Modal -->
   <div id="welcomeModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center border-2 border-emerald-600 transform transition-all scale-100 space-y-4 relative">
       <button onclick="closeWelcomeModal()" class="absolute top-3 left-3 text-gray-400 hover:text-gray-700 font-bold text-lg px-2">✕</button>
@@ -136,13 +136,21 @@
 
       <div>
         <label class="block text-gray-700 font-bold mb-1">3. ٹرانزیکشن ٹائپ (Txn Type)</label>
-        <select id="txnType" onchange="filterSubCategories()" class="w-full p-2 border rounded" required>
+        <select id="txnType" onchange="filterTxnTypeLogic()" class="w-full p-2 border rounded" required>
           <option value="">Select Txn Type</option>
         </select>
       </div>
 
+      <!-- Mandatory Category Selection (Shows for Expense) -->
+      <div id="categoryContainer" class="hidden">
+        <label class="block text-gray-700 font-bold mb-1">4. کیٹیگری (Category)</label>
+        <select id="categorySelect" onchange="onCategoryChange()" class="w-full p-2 border rounded">
+          <option value="">Select Category</option>
+        </select>
+      </div>
+
       <div class="search-box">
-        <label class="block text-gray-700 font-bold mb-1">4. ذیلی کیٹیگری (Sub Category)</label>
+        <label class="block text-gray-700 font-bold mb-1">5. ذیلی کیٹیگری (Sub Category)</label>
         <input type="text" id="subCategorySearch" placeholder="Type to search Sub Category..." oninput="filterSubCatSearch()" onfocus="showSubCatList()" class="w-full p-2 border rounded" autocomplete="off" required>
         <input type="hidden" id="subCategory">
         <input type="hidden" id="category">
@@ -370,9 +378,7 @@
       alert("پاس ورڈ کامیابی سے تبدیل ہو گیا ہے!");
     }
 
-    function logout() {
-      location.reload();
-    }
+    function logout() { location.reload(); }
 
     async function loadFormOptions() {
       const res = await fetch(`${SCRIPT_URL}?action=getSettings`);
@@ -420,11 +426,48 @@
       }
     }
 
-    function filterSubCategories() {
+    function filterTxnTypeLogic() {
       const selectedTxn = document.getElementById("txnType").value;
-      filteredMappings = allMappings.filter(m => m.txnType === selectedTxn);
+      const isExpense = selectedTxn.toLowerCase().includes("expense") || selectedTxn.toLowerCase().includes("ادائیگی");
+      
+      const phoneInput = document.getElementById("contactNo");
+      const categoryContainer = document.getElementById("categoryContainer");
+      const categorySelect = document.getElementById("categorySelect");
+      const subCatSearch = document.getElementById("subCategorySearch");
+
+      subCatSearch.value = "";
+      document.getElementById("subCategory").value = "";
+      document.getElementById("category").value = "";
+
+      if (isExpense) {
+        phoneInput.value = "";
+        phoneInput.disabled = true;
+
+        const expenseMappings = allMappings.filter(m => m.txnType === selectedTxn);
+        const categories = [...new Set(expenseMappings.map(m => m.category))];
+        
+        populateSelect("categorySelect", categories);
+        categorySelect.required = true;
+        categoryContainer.classList.remove("hidden");
+      } else {
+        phoneInput.disabled = false;
+        categorySelect.required = false;
+        categoryContainer.classList.add("hidden");
+        
+        filteredMappings = allMappings.filter(m => m.txnType === selectedTxn);
+        renderSubCatList(filteredMappings);
+      }
+    }
+
+    function onCategoryChange() {
+      const selectedTxn = document.getElementById("txnType").value;
+      const selectedCat = document.getElementById("categorySelect").value;
+      
+      document.getElementById("category").value = selectedCat;
       document.getElementById("subCategorySearch").value = "";
       document.getElementById("subCategory").value = "";
+
+      filteredMappings = allMappings.filter(m => m.txnType === selectedTxn && m.category === selectedCat);
       renderSubCatList(filteredMappings);
     }
 
@@ -473,7 +516,6 @@
         partyTypeSelect.value = "Tenant";
       } else {
         rentalBox.classList.add("hidden");
-        phoneInput.disabled = false;
       }
     }
 
@@ -496,6 +538,13 @@
       const isRent = (subCat === "Shop Rent" || subCat === "Doctor Chamber Rent");
       const isExpense = (txnTypeVal.toLowerCase().includes("expense") || txnTypeVal.toLowerCase().includes("ادائیگی"));
       
+      const categoryVal = isExpense ? document.getElementById("categorySelect").value : document.getElementById("category").value;
+
+      if (isExpense && !categoryVal) {
+        alert("برائے مہربانی Category منتخب کریں!");
+        return;
+      }
+
       const monthVal = document.getElementById("rentMonth").value;
       let yearVal = document.getElementById("rentYear").value;
 
@@ -510,7 +559,7 @@
         date: document.getElementById("txnDate").value,
         department: document.getElementById("department").value,
         txnType: txnTypeVal,
-        category: document.getElementById("category").value,
+        category: categoryVal,
         subCategory: subCat,
         partyType: document.getElementById("partyType").value,
         partyName: document.getElementById("partyName").value,
@@ -535,7 +584,6 @@
           document.getElementById("rPrintDateTime").innerText = data.printDateTime;
           document.getElementById("rEnteredBy").innerText = currentUser;
 
-          // Title Logic
           if (isRent) {
             document.getElementById("receiptTitle").innerText = "رسید بابت ماہانہ کرایہ";
           } else if (isExpense) {
@@ -545,8 +593,6 @@
           }
 
           const remarksHtml = remarksVal ? `<p><strong>تفصیل / ریمارکس:</strong> ${remarksVal}</p>` : `<p><strong>تفصیل / ریمارکس:</strong> -</p>`;
-
-          // Label Logic for Income vs Expense
           const partyLabel = isExpense ? "نام (Paid To)" : "نام (Received From)";
 
           let contentHtml = "";
@@ -568,6 +614,7 @@
               <p><strong>تاریخ ٹرانزیکشن:</strong> ${payload.date}</p>
               <p><strong>شعبہ:</strong> ${payload.department}</p>
               <p><strong>${partyLabel}:</strong> ${payload.partyName}</p>
+              <p><strong>کیٹیگری (Category):</strong> ${payload.category}</p>
               <p><strong>ذیلی کیٹیگری (Sub Category):</strong> ${payload.subCategory}</p>
               <p><strong>ادائیگی کا طریقہ:</strong> ${payload.paymentMode}</p>
               ${remarksHtml}
@@ -592,6 +639,7 @@
     function resetForm() {
       document.getElementById("txnForm").reset();
       document.getElementById("rentalFields").classList.add("hidden");
+      document.getElementById("categoryContainer").classList.add("hidden");
       document.getElementById("contactNo").disabled = false;
       document.getElementById("txnDate").valueAsDate = new Date();
     }
