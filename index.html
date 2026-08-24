@@ -10,16 +10,51 @@
     body { font-family: 'Noto Nastaliq Urdu', serif, sans-serif; }
     .search-box { position: relative; }
     .dropdown-list {
-      max-height: 180px; overflow-y: auto; border: 1px solid #e5e7eb;
-      background: #fff; position: absolute; top: 100%; left: 0; right: 0; z-index: 50; display: none;
+      max-height: 180px; 
+      overflow-y: auto; 
+      border: 1px solid #d1d5db;
+      background: #ffffff; 
+      position: absolute; 
+      top: 100%; 
+      left: 0; 
+      right: 0; 
+      z-index: 999; 
+      display: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
     .dropdown-item { padding: 8px 12px; cursor: pointer; direction: ltr; text-align: left; }
     .dropdown-item:hover { background-color: #f3f4f6; }
     select, input, textarea { direction: ltr; text-align: left; }
+
+    /* --- PRINT SETTINGS FOR SINGLE PAGE FIT --- */
     @media print {
-      body * { visibility: hidden; }
-      #printableReceipt, #printableReceipt * { visibility: visible; }
-      #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; }
+      @page {
+        size: A4 portrait;
+        margin: 5mm; /* Page margins reset to prevent 2nd blank page */
+      }
+      html, body {
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+      }
+      body * {
+        visibility: hidden;
+      }
+      #printableReceipt, #printableReceipt * {
+        visibility: visible;
+      }
+      #printableReceipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
     }
   </style>
 </head>
@@ -86,7 +121,7 @@
   <div id="formCard" class="bg-white p-6 rounded-b-xl shadow-lg w-full max-w-4xl hidden space-y-4">
     <h2 class="text-xl font-bold text-emerald-900 border-b pb-2">نئی ٹرانزیکشن انٹری</h2>
     
-    <form id="txnForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form id="txnForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
       <div>
         <label class="block text-gray-700 font-bold mb-1">1. تاریخ (Date)</label>
         <input type="date" id="txnDate" class="w-full p-2 border rounded" required>
@@ -277,11 +312,9 @@
       let timeLeft = 5;
       document.getElementById("timerSec").innerText = timeLeft;
 
-      // Clear any previous timer if exists
       if(timerInterval) clearInterval(timerInterval);
       if(welcomeTimer) clearTimeout(welcomeTimer);
 
-      // 1 sec interval countdown
       timerInterval = setInterval(() => {
         timeLeft--;
         if(timeLeft >= 0) {
@@ -289,7 +322,6 @@
         }
       }, 1000);
 
-      // Auto hide after 5 seconds
       welcomeTimer = setTimeout(() => {
         closeWelcomeModal();
       }, 5000);
@@ -373,10 +405,18 @@
 
     async function lookupDonor() {
       const phone = document.getElementById("contactNo").value;
-      if(phone.length > 5 && !document.getElementById("contactNo").disabled) {
-        const res = await fetch(`${SCRIPT_URL}?action=searchDonor&phone=${encodeURIComponent(phone)}`);
-        const data = await res.json();
-        if(data.name) document.getElementById("partyName").value = data.name;
+      if(phone.length >= 5 && !document.getElementById("contactNo").disabled) {
+        showLoader();
+        try {
+          const res = await fetch(`${SCRIPT_URL}?action=searchDonor&phone=${encodeURIComponent(phone)}`);
+          const data = await res.json();
+          hideLoader();
+          if(data.status === "success" && data.name) {
+            document.getElementById("partyName").value = data.name;
+          }
+        } catch(e) {
+          hideLoader();
+        }
       }
     }
 
@@ -390,8 +430,8 @@
 
     function filterSubCatSearch() {
       const q = document.getElementById("subCategorySearch").value.toLowerCase();
-      const list = (filteredMappings.length > 0 ? filteredMappings : allMappings)
-        .filter(m => m.subCategory.toLowerCase().includes(q));
+      const listToFilter = filteredMappings.length > 0 ? filteredMappings : allMappings;
+      const list = listToFilter.filter(m => m.subCategory.toLowerCase().includes(q));
       renderSubCatList(list);
       showSubCatList();
     }
@@ -409,6 +449,12 @@
     }
 
     function showSubCatList() { document.getElementById("subCatList").style.display = "block"; }
+
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest(".search-box")) {
+        document.getElementById("subCatList").style.display = "none";
+      }
+    });
 
     function selectSubCategory(m) {
       document.getElementById("subCategorySearch").value = m.subCategory;
@@ -474,7 +520,8 @@
         amount: document.getElementById("amount").value,
         remarks: remarksVal,
         enteredBy: currentUser,
-        shouldPrint: shouldPrint
+        shouldPrint: shouldPrint,
+        contactNo: document.getElementById("contactNo").value
       };
 
       showLoader();
@@ -521,11 +568,14 @@
           document.getElementById("receiptContent").innerHTML = contentHtml;
           document.getElementById("printableReceipt").classList.remove("hidden");
           window.print();
+          document.getElementById("printableReceipt").classList.add("hidden");
           resetForm();
         } else {
           alert("Transaction Saved Successfully! Invoice: " + data.receiptNo);
           resetForm();
         }
+      } else {
+        alert("مسئلہ آیا: " + data.message);
       }
     }
 
@@ -534,7 +584,6 @@
       document.getElementById("rentalFields").classList.add("hidden");
       document.getElementById("contactNo").disabled = false;
       document.getElementById("txnDate").valueAsDate = new Date();
-      document.getElementById("rentYear").value = "2026";
     }
   </script>
 </body>
