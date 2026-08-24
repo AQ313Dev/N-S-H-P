@@ -30,7 +30,7 @@
     @media print {
       @page {
         size: A4 portrait;
-        margin: 5mm; /* Page margins reset to prevent 2nd blank page */
+        margin: 5mm;
       }
       html, body {
         height: 100%;
@@ -253,7 +253,7 @@
   <div id="printableReceipt" class="hidden bg-white p-6 rounded border shadow-md max-w-lg w-full text-right" dir="rtl">
     <div class="text-center border-b pb-3 mb-4 space-y-2">
       <h1 class="text-3xl font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
-      <p class="text-base text-gray-700 pt-1" id="receiptTitle">رسید با بابت موصولی</p>
+      <p class="text-base text-gray-700 pt-1" id="receiptTitle">رسید بابت موصولی</p>
     </div>
     <div class="flex justify-between border-b pb-2 mb-3 text-sm">
       <span><strong>رسید نمبر:</strong> <span id="rReceiptNo"></span></span>
@@ -535,9 +535,16 @@
           document.getElementById("rPrintDateTime").innerText = data.printDateTime;
           document.getElementById("rEnteredBy").innerText = currentUser;
 
-          document.getElementById("receiptTitle").innerText = isExpense ? "رسید با بابت ادائیگی" : "رسید با بابت موصولی";
+          // Rent vs Expense vs Normal Title Logic
+          if (isRent) {
+            document.getElementById("receiptTitle").innerText = "رسید بابت ماہانہ کرایہ";
+          } else if (isExpense) {
+            document.getElementById("receiptTitle").innerText = "رسید بابت ادائیگی";
+          } else {
+            document.getElementById("receiptTitle").innerText = "رسید بابت موصولی";
+          }
 
-          const remarksHtml = remarksVal ? `<p><strong>تفصیل / ریمارکس:</strong> ${remarksVal}</p>` : `<p><strong>تفصیل / ریمارکس:</strong> -</p>`;
+          const remarksHtml = remarksVal ? `<p><strong>تفصیل / ریمارکس:</strong> ${remarksVal}</p>` : `<p><strong>تفصیل / رymارکس:</strong> -</p>`;
 
           let contentHtml = "";
           if(isRent) {
