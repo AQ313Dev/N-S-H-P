@@ -26,34 +26,14 @@
     .dropdown-item:hover { background-color: #f3f4f6; }
     select, input, textarea { direction: ltr; text-align: left; }
 
-    /* PRINT SETTINGS FOR SINGLE PAGE FIT */
     @media print {
-      @page {
-        size: A4 portrait;
-        margin: 5mm;
-      }
-      html, body {
-        height: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-      }
-      body * {
-        visibility: hidden;
-      }
-      #printableReceipt, #printableReceipt * {
-        visibility: visible;
-      }
+      @page { size: A4 portrait; margin: 5mm; }
+      html, body { height: 100%; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+      body * { visibility: hidden; }
+      #printableReceipt, #printableReceipt * { visibility: visible; }
       #printableReceipt {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100% !important;
-        max-width: 100% !important;
-        box-shadow: none !important;
-        border: 1px solid #ccc !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
+        position: absolute; left: 0; top: 0; width: 100% !important; max-width: 100% !important;
+        box-shadow: none !important; border: 1px solid #ccc !important; page-break-inside: avoid !important;
       }
     }
   </style>
@@ -70,7 +50,7 @@
 
   <!-- Welcome Popup Modal -->
   <div id="welcomeModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center border-2 border-emerald-600 transform transition-all scale-100 space-y-4 relative">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center border-2 border-emerald-600 space-y-4 relative">
       <button onclick="closeWelcomeModal()" class="absolute top-3 left-3 text-gray-400 hover:text-gray-700 font-bold text-lg px-2">✕</button>
       <div class="text-4xl text-emerald-800 font-bold mb-2">السلام علیکم</div>
       <div id="modalUserName" class="text-2xl font-bold text-gray-800 border-b pb-3"></div>
@@ -78,7 +58,7 @@
         اللهم صل على محمد وآل محمد وعجل فرجهم
       </div>
       <div class="pt-4">
-        <button id="skipBtn" onclick="closeWelcomeModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-8 py-2.5 rounded-lg shadow-md hover:shadow-lg transition">
+        <button id="skipBtn" onclick="closeWelcomeModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-8 py-2.5 rounded-lg shadow-md transition">
           آگے بڑھیں (Skip) - <span id="timerSec">5</span>s
         </button>
       </div>
@@ -141,7 +121,6 @@
         </select>
       </div>
 
-      <!-- Mandatory Category Selection (Shows for Expense) -->
       <div id="categoryContainer" class="hidden">
         <label class="block text-gray-700 font-bold mb-1">4. کیٹیگری (Category)</label>
         <select id="categorySelect" onchange="onCategoryChange()" class="w-full p-2 border rounded">
@@ -294,10 +273,7 @@
       const p = document.getElementById("password").value;
       
       try {
-        const res = await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "login", username: u, password: p })
-        });
+        const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
         const data = await res.json();
         hideLoader();
         if(data.status === "success") {
@@ -318,7 +294,7 @@
       } catch(err) { 
         hideLoader(); 
         console.error(err);
-        alert("Server Connection Failed! Check Web App Deployment (Anyone permission & New Version)."); 
+        alert("Server Connection Failed!"); 
       }
     }
 
@@ -339,9 +315,7 @@
         }
       }, 1000);
 
-      welcomeTimer = setTimeout(() => {
-        closeWelcomeModal();
-      }, 5000);
+      welcomeTimer = setTimeout(() => { closeWelcomeModal(); }, 5000);
     }
 
     function closeWelcomeModal() {
@@ -358,19 +332,13 @@
           const res = await fetch(`${SCRIPT_URL}?action=forgotPassword&username=${encodeURIComponent(u)}`);
           const data = await res.json();
           hideLoader();
-          if(data.status === "success") {
-            alert("پاس ورڈ ری سیٹ کی درخواست ای میل کر دی گئی ہے۔");
-          } else {
-            alert("ای میل بھیجنے میں مسئلہ آیا: " + data.message);
-          }
+          if(data.status === "success") alert("پاس ورڈ ری سیٹ کی درخواست ای میل کر دی گئی ہے۔");
+          else alert("ای میل بھیجنے میں مسئلہ آیا: " + data.message);
         } catch(e) { hideLoader(); alert("Error processing request!"); }
       }
     }
 
-    function toggleUserMenu() {
-      document.getElementById("userMenu").classList.toggle("hidden");
-    }
-
+    function toggleUserMenu() { document.getElementById("userMenu").classList.toggle("hidden"); }
     function showChangePassModal() { toggleUserMenu(); document.getElementById("changePassModal").classList.remove("hidden"); }
     function hideChangePassModal() { document.getElementById("changePassModal").classList.add("hidden"); }
 
@@ -378,10 +346,7 @@
       const newP = document.getElementById("newPassword").value;
       if(!newP) return;
       showLoader();
-      const res = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "changePassword", username: activeUsername, newPassword: newP })
-      });
+      const res = await fetch(`${SCRIPT_URL}?action=changePassword&username=${encodeURIComponent(activeUsername)}&newPassword=${encodeURIComponent(newP)}`);
       hideLoader();
       hideChangePassModal();
       alert("پاس ورڈ کامیابی سے تبدیل ہو گیا ہے!");
@@ -390,22 +355,31 @@
     function logout() { location.reload(); }
 
     async function loadFormOptions() {
-      const res = await fetch(`${SCRIPT_URL}?action=getSettings`);
-      const data = await res.json();
-      allMappings = data.mappings || [];
-      propertyMap = data.propertyTenantMap || [];
-      populateSelect("department", data.departments);
-      populateSelect("txnType", data.txnTypes);
-      populateSelect("partyType", data.partyTypes);
-      populateSelect("paymentMode", data.paymentModes);
+      showLoader();
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getSettings`);
+        const data = await res.json();
+        hideLoader();
 
-      const propSelect = document.getElementById("propertyAddress");
-      propSelect.innerHTML = '<option value="">Select Address</option>';
-      propertyMap.forEach(p => {
-        let opt = document.createElement("option");
-        opt.value = p.address; opt.innerText = p.address;
-        propSelect.appendChild(opt);
-      });
+        allMappings = data.mappings || [];
+        propertyMap = data.propertyTenantMap || [];
+        
+        populateSelect("department", data.departments);
+        populateSelect("txnType", data.txnTypes);
+        populateSelect("partyType", data.partyTypes);
+        populateSelect("paymentMode", data.paymentModes);
+
+        const propSelect = document.getElementById("propertyAddress");
+        propSelect.innerHTML = '<option value="">Select Address</option>';
+        propertyMap.forEach(p => {
+          let opt = document.createElement("option");
+          opt.value = p.address; opt.innerText = p.address;
+          propSelect.appendChild(opt);
+        });
+      } catch(e) {
+        hideLoader();
+        alert("Failed to load dropdown options from server!");
+      }
     }
 
     function populateSelect(id, list) {
@@ -429,9 +403,7 @@
           if(data.status === "success" && data.name) {
             document.getElementById("partyName").value = data.name;
           }
-        } catch(e) {
-          hideLoader();
-        }
+        } catch(e) { hideLoader(); }
       }
     }
 
@@ -562,9 +534,8 @@
         return;
       }
 
-      const remarksVal = document.getElementById("remarks").value;
-
-      const payload = {
+      const queryParams = new URLSearchParams({
+        action: "saveTxn",
         date: document.getElementById("txnDate").value,
         department: document.getElementById("department").value,
         txnType: txnTypeVal,
@@ -576,14 +547,13 @@
         rentMonthYear: isRent ? `${monthVal}-${yearVal}` : "",
         paymentMode: document.getElementById("paymentMode").value,
         amount: document.getElementById("amount").value,
-        remarks: remarksVal,
+        remarks: document.getElementById("remarks").value,
         enteredBy: currentUser,
-        shouldPrint: shouldPrint,
         contactNo: document.getElementById("contactNo").value
-      };
+      });
 
       showLoader();
-      const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+      const res = await fetch(`${SCRIPT_URL}?${queryParams.toString()}`);
       const data = await res.json();
       hideLoader();
       
@@ -593,41 +563,38 @@
           document.getElementById("rPrintDateTime").innerText = data.printDateTime;
           document.getElementById("rEnteredBy").innerText = currentUser;
 
-          if (isRent) {
-            document.getElementById("receiptTitle").innerText = "رسید بابت ماہانہ کرایہ";
-          } else if (isExpense) {
-            document.getElementById("receiptTitle").innerText = "رسید بابت ادائیگی";
-          } else {
-            document.getElementById("receiptTitle").innerText = "رسید بابت موصولی";
-          }
+          if (isRent) document.getElementById("receiptTitle").innerText = "رسید بابت ماہانہ کرایہ";
+          else if (isExpense) document.getElementById("receiptTitle").innerText = "رسید بابت ادائیگی";
+          else document.getElementById("receiptTitle").innerText = "رسید بابت موصولی";
 
+          const remarksVal = document.getElementById("remarks").value;
           const remarksHtml = remarksVal ? `<p><strong>تفصیل / ریمارکس:</strong> ${remarksVal}</p>` : `<p><strong>تفصیل / ریمارکس:</strong> -</p>`;
           const partyLabel = isExpense ? "نام (Paid To)" : "نام (Received From)";
 
           let contentHtml = "";
           if(isRent) {
             contentHtml = `
-              <p><strong>تاریخ ٹرانزیکشن:</strong> ${payload.date}</p>
-              <p><strong>نام کرایہ دار:</strong> ${payload.partyName}</p>
+              <p><strong>تاریخ ٹرانزیکشن:</strong> ${document.getElementById("txnDate").value}</p>
+              <p><strong>نام کرایہ دار:</strong> ${document.getElementById("partyName").value}</p>
               <p><strong>ولدیت:</strong> ${document.getElementById("tenantFatherDisplay").value}</p>
               <p><strong>CNIC / Contact:</strong> ${document.getElementById("tenantCnicDisplay").value} / ${document.getElementById("tenantContactDisplay").value}</p>
-              <p><strong>پراپرٹی ایڈریس:</strong> ${payload.propertyAddress}</p>
-              <p><strong>کرایہ کا مہینہ / سال:</strong> ${payload.rentMonthYear}</p>
+              <p><strong>پراپرٹی ایڈریس:</strong> ${document.getElementById("propertyAddress").value}</p>
+              <p><strong>کرایہ کا مہینہ / سال:</strong> ${monthVal}-${yearVal}</p>
               <p><strong>طے شدہ ماہانہ کرایہ:</strong> PKR ${document.getElementById("tenantRentDisplay").value}</p>
-              <p><strong>وصول شدہ رقم:</strong> PKR ${payload.amount}</p>
-              <p><strong>ادائیگی کا طریقہ:</strong> ${payload.paymentMode}</p>
+              <p><strong>وصول شدہ رقم:</strong> PKR ${document.getElementById("amount").value}</p>
+              <p><strong>ادائیگی کا طریقہ:</strong> ${document.getElementById("paymentMode").value}</p>
               ${remarksHtml}
             `;
           } else {
             contentHtml = `
-              <p><strong>تاریخ ٹرانزیکشن:</strong> ${payload.date}</p>
-              <p><strong>شعبہ:</strong> ${payload.department}</p>
-              <p><strong>${partyLabel}:</strong> ${payload.partyName}</p>
-              <p><strong>کیٹیگری (Category):</strong> ${payload.category}</p>
-              <p><strong>ذیلی کیٹیگری (Sub Category):</strong> ${payload.subCategory}</p>
-              <p><strong>ادائیگی کا طریقہ:</strong> ${payload.paymentMode}</p>
+              <p><strong>تاریخ ٹرانزیکشن:</strong> ${document.getElementById("txnDate").value}</p>
+              <p><strong>شعبہ:</strong> ${document.getElementById("department").value}</p>
+              <p><strong>${partyLabel}:</strong> ${document.getElementById("partyName").value}</p>
+              <p><strong>کیٹیگری (Category):</strong> ${categoryVal}</p>
+              <p><strong>ذیلی کیٹیگری (Sub Category):</strong> ${subCat}</p>
+              <p><strong>ادائیگی کا طریقہ:</strong> ${document.getElementById("paymentMode").value}</p>
               ${remarksHtml}
-              <p class="text-lg font-bold border-t pt-2 mt-2"><strong>رقم:</strong> PKR ${payload.amount}</p>
+              <p class="text-lg font-bold border-t pt-2 mt-2"><strong>رقم:</strong> PKR ${document.getElementById("amount").value}</p>
             `;
           }
 
