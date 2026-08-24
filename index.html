@@ -294,7 +294,10 @@
       const p = document.getElementById("password").value;
       
       try {
-        const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "login", username: u, password: p })
+        });
         const data = await res.json();
         hideLoader();
         if(data.status === "success") {
@@ -309,8 +312,14 @@
           
           showWelcomePopup(currentUser);
           loadFormOptions();
-        } else { alert("غلط یوزر نیم یا پاس ورڈ!"); }
-      } catch(err) { hideLoader(); alert("Error connecting to server!"); }
+        } else { 
+          alert("غلط یوزر نیم یا پاس ورڈ!"); 
+        }
+      } catch(err) { 
+        hideLoader(); 
+        console.error(err);
+        alert("Server Connection Failed! Check Web App Deployment (Anyone permission & New Version)."); 
+      }
     }
 
     function showWelcomePopup(name) {
