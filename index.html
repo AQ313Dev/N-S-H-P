@@ -27,6 +27,10 @@
     select, input, textarea { direction: ltr; text-align: left; }
 
     @media print {
+      @page {
+        size: A4 portrait;
+        margin: 5mm;
+      }
       body * {
         visibility: hidden;
       }
@@ -39,10 +43,11 @@
         top: 0;
         width: 100% !important;
         margin: 0 !important;
-        padding: 10px !important;
-        box-shadow: none !important;
-        border: 1px solid #333 !important;
+        padding: 0 !important;
         display: block !important;
+      }
+      .receipt-copy {
+        box-shadow: none !important;
       }
     }
   </style>
@@ -245,25 +250,58 @@
     </div>
   </div>
 
-  <!-- Dynamic Receipt Template -->
-  <div id="printableReceipt" class="hidden bg-white p-6 rounded border shadow-md max-w-lg w-full text-right" dir="rtl">
-    <div class="text-center border-b pb-3 mb-4 space-y-2">
-      <h1 class="text-3xl font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
-      <p class="text-base text-gray-700 pt-1" id="receiptTitle">رسید بابت موصولی</p>
-    </div>
-    <div class="flex justify-between border-b pb-2 mb-3 text-sm">
-      <span><strong>رسید نمبر:</strong> <span id="rReceiptNo"></span></span>
-      <span><strong>پرنٹنگ کی تاریخ و وقت:</strong> <span id="rPrintDateTime"></span></span>
-    </div>
-    <div id="receiptContent" class="space-y-2 text-sm"></div>
-    <div class="mt-8 flex justify-between items-end text-xs text-gray-700 pt-4 border-t">
-      <div class="text-left">
-        <p><strong>انٹری کنندہ (Entered By):</strong> <span id="rEnteredBy"></span></p>
-        <p class="text-[10px] text-gray-400 mt-1">System Generated Slip</p>
+  <!-- Dynamic Receipt Template (A4 Top - 2 Copies Layout) -->
+  <div id="printableReceipt" class="hidden w-full" dir="rtl">
+    <div class="grid grid-cols-2 gap-2 w-full">
+      
+      <!-- Depositor Copy -->
+      <div class="receipt-copy border border-gray-400 p-3 rounded text-right text-[11px] leading-snug flex flex-col justify-between">
+        <div>
+          <div class="text-left font-bold text-[10px] text-gray-600 border-b pb-0.5">Depositor Copy</div>
+          <div class="text-center border-b pb-1 my-1">
+            <h1 class="text-lg font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
+            <p class="text-xs text-gray-700" id="receiptTitle1">رسید بابت موصولی</p>
+          </div>
+          <div class="flex justify-between border-b pb-1 mb-1 text-[10px]">
+            <span><strong>رسید نمبر:</strong> <span class="rReceiptNo"></span></span>
+            <span><strong>پرنٹنگ:</strong> <span class="rPrintDateTime"></span></span>
+          </div>
+          <div class="receiptContent space-y-0.5"></div>
+        </div>
+        <div class="mt-2 flex justify-between items-end text-[9px] text-gray-700 pt-1 border-t">
+          <div>
+            <p><strong>انٹری کنندہ:</strong> <span class="rEnteredBy"></span></p>
+          </div>
+          <div>
+            <p>دستخط وصول کنندہ: _________</p>
+          </div>
+        </div>
       </div>
-      <div class="text-right">
-        <p class="mb-4">دستخط وصول کنندہ: ___________________</p>
+
+      <!-- Nizam ul Sharia Copy -->
+      <div class="receipt-copy border border-gray-400 p-3 rounded text-right text-[11px] leading-snug flex flex-col justify-between">
+        <div>
+          <div class="text-left font-bold text-[10px] text-gray-600 border-b pb-0.5">Nizam ul Sharia Copy</div>
+          <div class="text-center border-b pb-1 my-1">
+            <h1 class="text-lg font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
+            <p class="text-xs text-gray-700" id="receiptTitle2">رسید بابت موصولی</p>
+          </div>
+          <div class="flex justify-between border-b pb-1 mb-1 text-[10px]">
+            <span><strong>رسید نمبر:</strong> <span class="rReceiptNo"></span></span>
+            <span><strong>پرنٹنگ:</strong> <span class="rPrintDateTime"></span></span>
+          </div>
+          <div class="receiptContent space-y-0.5"></div>
+        </div>
+        <div class="mt-2 flex justify-between items-end text-[9px] text-gray-700 pt-1 border-t">
+          <div>
+            <p><strong>انٹری کنندہ:</strong> <span class="rEnteredBy"></span></p>
+          </div>
+          <div>
+            <p>دستخط وصول کنندہ: _________</p>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 
@@ -378,7 +416,7 @@
         populateSelect("partyType", data.partyTypes);
         populateSelect("paymentMode", data.paymentModes);
 
-        filterPropertyAddressDropdown(); // Initial load for addresses
+        filterPropertyAddressDropdown();
       } catch(e) {
         hideLoader();
         alert("Settings load karne mein masla aya!");
@@ -401,7 +439,6 @@
         propSelect.appendChild(opt);
       });
 
-      // Clear tenant auto fields on address list reset
       clearTenantFields();
     }
 
@@ -541,18 +578,18 @@
         phoneInput.disabled = true;
         phoneInput.value = "";
         partyTypeSelect.value = "Tenant";
-        filterPropertyAddressDropdown("Shop"); // Filter addresses for Shop
+        filterPropertyAddressDropdown("Shop");
       } else if(m.subCategory === "Doctor Chamber Rent") {
         rentalBox.classList.remove("hidden");
         phoneInput.disabled = true;
         phoneInput.value = "";
         partyTypeSelect.value = "Tenant";
-        filterPropertyAddressDropdown("Doctor Chamber"); // Filter addresses for Doctor Chamber
+        filterPropertyAddressDropdown("Doctor Chamber");
       } else {
         rentalBox.classList.add("hidden");
         const isExpense = document.getElementById("txnType").value.toLowerCase().includes("expense");
         phoneInput.disabled = isExpense;
-        filterPropertyAddressDropdown(); // Reset address list
+        filterPropertyAddressDropdown();
       }
     }
 
@@ -623,31 +660,35 @@
       
       if(data.status === "success") {
         if(shouldPrint) {
-          document.getElementById("rReceiptNo").innerText = data.receiptNo;
-          document.getElementById("rPrintDateTime").innerText = data.printDateTime;
-          document.getElementById("rEnteredBy").innerText = currentUser;
+          document.querySelectorAll(".rReceiptNo").forEach(e => e.innerText = data.receiptNo);
+          document.querySelectorAll(".rPrintDateTime").forEach(e => e.innerText = data.printDateTime);
+          document.querySelectorAll(".rEnteredBy").forEach(e => e.innerText = currentUser);
+
+          const rTitle1 = document.getElementById("receiptTitle1");
+          const rTitle2 = document.getElementById("receiptTitle2");
 
           if (isRent) {
-            document.getElementById("receiptTitle").innerText = "رسید بابت ماہانہ کرایہ";
+            rTitle1.innerText = "رسید بابت ماہانہ کرایہ";
+            rTitle2.innerText = "رسید بابت ماہانہ کرایہ";
           } else if (isExpense) {
-            document.getElementById("receiptTitle").innerText = "رسید بابت ادائیگی";
+            rTitle1.innerText = "رسید بابت ادائیگی";
+            rTitle2.innerText = "رسید بابت ادائیگی";
           } else {
-            document.getElementById("receiptTitle").innerText = "رسید بابت موصولی";
+            rTitle1.innerText = "رسید بابت موصولی";
+            rTitle2.innerText = "رسید بابت موصولی";
           }
-
-          const partyLabel = isExpense ? "نام (Paid To)" : "نام (Received From)";
 
           let contentHtml = `
             <p><strong>تاریخ ٹرانزیکشن:</strong> ${payload.date}</p>
             <p><strong>شعبہ / کیٹیگری:</strong> ${payload.department} (${payload.category} / ${payload.subCategory})</p>
-            <p><strong>${partyLabel}:</strong> ${payload.partyName} (${payload.partyType})</p>
-            ${isRent ? `<p><strong>پراپرٹی ایڈریس:</strong> ${payload.propertyAddress}</p><p><strong>کرایہ مہینہ/سال:</strong> ${payload.rentMonthYear}</p>` : ''}
+            <p><strong>وصول شدہ رقم از:</strong> ${payload.partyName} (${payload.partyType})</p>
+            ${isRent ? `<p><strong>پراپرٹی ایڈریس:</strong> ${payload.propertyAddress}</p><p><strong>کرایہ برائے ماہ:</strong> ${payload.rentMonthYear}</p>` : ''}
             <p><strong>ادائیگی کا طریقہ:</strong> ${payload.paymentMode}</p>
-            <p class="text-lg font-bold text-emerald-900 border-t border-b py-1"><strong>کل رقم:</strong> PKR ${payload.amount}/-</p>
-            ${remarksVal ? `<p><strong>تفصیل / ریمارکس:</strong> ${remarksVal}</p>` : `<p><strong>تفصیل / ریمارکس:</strong> -</p>`}
+            <p class="text-sm font-bold text-emerald-900 border-t border-b my-0.5 py-0.5"><strong>کل رقم:</strong> PKR ${payload.amount}/-</p>
+            ${remarksVal ? `<p><strong>تفصیل / ریمارکس:</strong> ${remarksVal}</p>` : `<p><strong>تفصیل / رymارکس:</strong> -</p>`}
           `;
 
-          document.getElementById("receiptContent").innerHTML = contentHtml;
+          document.querySelectorAll(".receiptContent").forEach(e => e.innerHTML = contentHtml);
           
           const receiptEl = document.getElementById("printableReceipt");
           receiptEl.classList.remove("hidden");
