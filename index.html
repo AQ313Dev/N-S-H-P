@@ -3,34 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام الشریعہ انٹری سسٹم</title>
+  <title>نظام الشریعہ - Transaction Form</title>
   <style>
     * { box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; direction: rtl; }
-    .container { max-width: 750px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .header-bar { background-color: #0b5345; color: white; padding: 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .header-bar h2 { margin: 0; font-size: 20px; }
-    .lang-btn { background-color: #ffffff; color: #0b5345; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f5; margin: 0; padding: 20px; direction: rtl; }
+    .container { max-width: 800px; margin: auto; background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    
+    /* Header & Top Bar */
+    .top-header { background-color: #0b5345; color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; margin: -25px -25px 20px -25px; }
+    .top-header h3 { margin: 0; font-size: 18px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .btn-header { background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .btn-header:hover { background: rgba(255,255,255,0.4); }
+    
+    /* Login Modal Overlay */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+    .modal-card { background: white; padding: 30px; border-radius: 8px; width: 350px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+
     .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
     .form-group { flex: 1; position: relative; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; font-size: 14px; }
-    select, input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none; }
-    
-    /* Custom Dropdown & Search List Styling */
-    .custom-select-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; max-height: 150px; overflow-y: auto; z-index: 1000; border-radius: 0 0 4px 4px; display: none; }
-    .custom-select-list div { padding: 8px 12px; cursor: pointer; }
-    .custom-select-list div:hover { background-color: #eef2f5; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 14px; }
+    select, input, textarea { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; background-color: #fff; outline: none; }
+    select:focus, input:focus, textarea:focus { border-color: #0b5345; box-shadow: 0 0 5px rgba(11,83,69,0.2); }
 
-    .submit-btn { width: 100%; padding: 12px; background-color: #0b5345; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    /* Custom Search List for Sub Category */
+    .custom-select-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ced4da; max-height: 180px; overflow-y: auto; z-index: 1000; border-radius: 0 0 6px 6px; display: none; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .custom-select-list div { padding: 9px 12px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+    .custom-select-list div:hover { background-color: #eef2f5; color: #0b5345; font-weight: bold; }
+
+    /* Conditional Property Details Box */
+    .property-box { background-color: #f8f9fa; border: 1px dashed #0b5345; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: none; }
+
+    .submit-btn { width: 100%; padding: 12px; background-color: #0b5345; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     .submit-btn:hover { background-color: #07372d; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="header-bar">
-    <h2 id="lbl-title">نظام الشریعہ انٹری سسٹم - نئی ٹرانزیکشن انٹری</h2>
-    <button type="button" class="lang-btn" onclick="toggleLanguage()" id="btn-lang">English</button>
+<!-- Login Modal -->
+<div id="loginModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3 id="lbl-login-title">سسٹم لاگ ان (Login)</h3>
+    <div style="margin-bottom: 15px;">
+      <input type="text" id="usernameInput" placeholder="User Name / صارف کا نام" style="margin-bottom: 10px;">
+      <input type="password" id="passwordInput" placeholder="Password / پاس ورڈ">
+    </div>
+    <button type="button" class="submit-btn" onclick="handleLogin()">Login / لاگ ان کریں</button>
+  </div>
+</div>
+
+<div class="container" id="mainApp" style="display: none;">
+  <!-- Header Bar -->
+  <div class="top-header">
+    <div class="header-actions">
+      <button type="button" class="btn-header" onclick="toggleLanguage()" id="btn-lang">English</button>
+      <button type="button" class="btn-header" onclick="showOptions()">Options ⚙</button>
+    </div>
+    <h3 id="lbl-header-title">نظام الشریعہ انٹری سسٹم - نئی ٹرانزیکشن انٹری</h3>
+    <span id="userWelcome" style="font-size: 13px;">السلام علیکم</span>
   </div>
 
   <form id="txnForm">
@@ -41,7 +71,7 @@
       </div>
       <div class="form-group">
         <label id="lbl-dept">2. شعبہ (Department)</label>
-        <select id="department" required></select>
+        <select id="department" required onchange="checkPropertyCondition()"></select>
       </div>
     </div>
 
@@ -64,8 +94,23 @@
         <div id="subCatList" class="custom-select-list"></div>
       </div>
       <div class="form-group">
-        <label id="lbl-contact">فون نمبر / Donor Search</label>
+        <label id="lbl-contact">Donor Search / فون نمبر</label>
         <input type="text" id="contactNo" placeholder="Type phone for Donor search" onblur="autoSearchDonor()" />
+      </div>
+    </div>
+
+    <!-- Conditional Rent / Property Details Section -->
+    <div id="propertyDetailsSection" class="property-box">
+      <h4 style="margin-top: 0; color: #0b5345;" id="lbl-prop-title">پراپرٹی / کرایہ کی تفصیلات (Property Details)</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label id="lbl-prop-addr">پراپرٹی کا پتہ (Property Address)</label>
+          <input type="text" id="propertyAddress" placeholder="دکان / مکان نمبر..." />
+        </div>
+        <div class="form-group">
+          <label id="lbl-rent-month">کرایہ کا مہینہ و سال (Rent Month & Year)</label>
+          <input type="month" id="rentMonthYear" />
+        </div>
       </div>
     </div>
 
@@ -99,9 +144,10 @@
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhPqsZzXd3G_UlmgoiMA814M_tSHOUD-yWTelEYo1TtloIMhYCoT7grP0SVfA_TcxhlA/exec";
 
   let appSettings = {};
-  let currentLang = 'ur'; // Default Urdu
+  let currentLang = 'ur';
+  let currentUser = "";
 
-  // Translation mapping helper
+  // Dynamic Translation Helper
   function getTranslatedText(englishText) {
     if (!englishText) return "";
     if (currentLang === 'ur' && appSettings.translations && appSettings.translations[englishText]) {
@@ -110,7 +156,7 @@
     return englishText;
   }
 
-  // Populate Dropdown Helper (UI = Urdu, Value = English)
+  // Populate Dropdowns with Translation Support
   function populateSelect(elementId, itemsList) {
     const select = document.getElementById(elementId);
     if (!select) return;
@@ -119,15 +165,31 @@
     
     itemsList.forEach(item => {
       let option = document.createElement('option');
-      option.value = item; // English Value Sheet ke liye
-      option.innerText = getTranslatedText(item); // Urdu Label UI ke liye
+      option.value = item; // Data send hone ke liye English key
+      option.innerText = getTranslatedText(item); // Label Urdu/English
       select.appendChild(option);
     });
     
     if(currentValue) select.value = currentValue;
   }
 
-  // Fetch Settings via API URL
+  // Handle Login
+  function handleLogin() {
+    const u = document.getElementById('usernameInput').value.trim();
+    const p = document.getElementById('passwordInput').value.trim();
+    
+    if (u && p) {
+      currentUser = u;
+      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('userWelcome').innerText = `السلام علیکم، ${currentUser}`;
+      loadSettings();
+    } else {
+      alert("براہ کرم یوزر نام اور پاس ورڈ درج کریں۔");
+    }
+  }
+
+  // Load Settings from Web App URL
   function loadSettings() {
     fetch(`${SCRIPT_URL}?action=getSettings`)
       .then(res => res.json())
@@ -137,25 +199,33 @@
           renderAllDropdowns();
         }
       })
-      .catch(err => console.error("Settings load error:", err));
+      .catch(err => console.error("Error loading settings:", err));
   }
 
-  // Render Dropdowns
   function renderAllDropdowns() {
     populateSelect('department', appSettings.departments || []);
     populateSelect('txnType', appSettings.txnTypes || []);
     populateSelect('paymentMode', appSettings.paymentModes || []);
     
-    // Extract & Populate Unique Categories
     if (appSettings.mappings) {
       const cats = Array.from(new Set(appSettings.mappings.map(m => m.category).filter(Boolean)));
       populateSelect('category', cats);
     }
-
     filterSubCategories();
   }
 
-  // Filter & Render Custom Sub-Category List in Urdu
+  // Check Department for Property Details Display
+  function checkPropertyCondition() {
+    const dept = document.getElementById('department').value;
+    const propSection = document.getElementById('propertyDetailsSection');
+    if (dept.toLowerCase().includes("property") || dept.includes("کرایہ داری املاک") || dept.includes("Rent")) {
+      propSection.style.display = 'block';
+    } else {
+      propSection.style.display = 'none';
+    }
+  }
+
+  // Sub-Category Filter and Dynamic Urdu Custom Render
   function filterSubCategories() {
     const selectedTxn = document.getElementById('txnType').value;
     let filteredSubCats = [];
@@ -174,7 +244,6 @@
     renderSubCatCustomList(window.availableSubCats);
   }
 
-  // Render Custom Search Dropdown Items in Urdu
   function renderSubCatCustomList(list) {
     const container = document.getElementById('subCatList');
     container.innerHTML = '';
@@ -186,11 +255,10 @@
 
     list.forEach(item => {
       const div = document.createElement('div');
-      // URDU TRANSLATED TEXT DISPLAY HERE:
-      div.innerText = getTranslatedText(item);
+      div.innerText = getTranslatedText(item); // Show Urdu Text in List
       div.onclick = function() {
         document.getElementById('subCategorySearch').value = getTranslatedText(item);
-        document.getElementById('subCategory').value = item; // Sheet value (English)
+        document.getElementById('subCategory').value = item;
         container.style.display = 'none';
       };
       container.appendChild(div);
@@ -215,14 +283,13 @@
     document.getElementById('subCatList').style.display = 'block';
   }
 
-  // Hide custom dropdown list when clicking outside
   document.addEventListener('click', function(e) {
     if (!e.target.closest('#subCategorySearch') && !e.target.closest('#subCatList')) {
       document.getElementById('subCatList').style.display = 'none';
     }
   });
 
-  // Auto Search Donor Name
+  // Auto Search Donor
   function autoSearchDonor() {
     const phone = document.getElementById('contactNo').value;
     if (phone.length >= 7) {
@@ -237,7 +304,11 @@
     }
   }
 
-  // Language Switch
+  function showOptions() {
+    alert("Options Dialog / Settings Menu Open");
+  }
+
+  // Toggle English / Urdu
   function toggleLanguage() {
     currentLang = currentLang === 'ur' ? 'en' : 'ur';
     document.body.dir = currentLang === 'ur' ? 'rtl' : 'ltr';
@@ -246,7 +317,7 @@
     renderAllDropdowns();
   }
 
-  // Submit Handler
+  // Form Submission
   document.getElementById('txnForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -263,10 +334,10 @@
       contactNo: document.getElementById('contactNo').value,
       amount: document.getElementById('amount').value,
       remarks: document.getElementById('remarks').value,
-      propertyAddress: "",
-      rentMonthYear: "",
+      propertyAddress: document.getElementById('propertyAddress').value,
+      rentMonthYear: document.getElementById('rentMonthYear').value,
       date: document.getElementById('txnDate').value,
-      enteredBy: "User",
+      enteredBy: currentUser || "User",
       shouldPrint: false
     };
 
@@ -279,16 +350,19 @@
       if (result.status === "success") {
         alert("انٹری کامیابی سے محفوظ ہو گئی ہے! رسید نمبر: " + result.receiptNo);
         document.getElementById('txnForm').reset();
+        checkPropertyCondition();
       } else {
         alert("خطا: انٹری محفوظ نہیں ہو سکی۔");
       }
+    })
+    .catch(err => {
+      console.error("Submit error:", err);
+      alert("Network Error!");
     });
   });
 
-  // Set Today's Date by Default
+  // Default Today Date
   document.getElementById('txnDate').valueAsDate = new Date();
-
-  window.onload = loadSettings;
 </script>
 
 </body>
