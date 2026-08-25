@@ -26,7 +26,6 @@
     .dropdown-item:hover { background-color: #f3f4f6; }
     select, input, textarea { direction: ltr; text-align: left; }
 
-    /* Purane print rules fix */
     @media print {
       body * {
         visibility: hidden;
@@ -246,7 +245,7 @@
     </div>
   </div>
 
-  <!-- Dynamic Receipt Template (Purana Visual Template) -->
+  <!-- Dynamic Receipt Template -->
   <div id="printableReceipt" class="hidden bg-white p-6 rounded border shadow-md max-w-lg w-full text-right" dir="rtl">
     <div class="text-center border-b pb-3 mb-4 space-y-2">
       <h1 class="text-3xl font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
@@ -379,17 +378,39 @@
         populateSelect("partyType", data.partyTypes);
         populateSelect("paymentMode", data.paymentModes);
 
-        const propSelect = document.getElementById("propertyAddress");
-        propSelect.innerHTML = '<option value="">Select Address</option>';
-        propertyMap.forEach(p => {
-          let opt = document.createElement("option");
-          opt.value = p.address; opt.innerText = p.address;
-          propSelect.appendChild(opt);
-        });
+        filterPropertyAddressDropdown(); // Initial load for addresses
       } catch(e) {
         hideLoader();
         alert("Settings load karne mein masla aya!");
       }
+    }
+
+    function filterPropertyAddressDropdown(filterType) {
+      const propSelect = document.getElementById("propertyAddress");
+      propSelect.innerHTML = '<option value="">Select Address</option>';
+
+      let filteredList = propertyMap;
+      if (filterType) {
+        filteredList = propertyMap.filter(p => p.propertyType.toLowerCase() === filterType.toLowerCase());
+      }
+
+      filteredList.forEach(p => {
+        let opt = document.createElement("option");
+        opt.value = p.address; 
+        opt.innerText = p.address;
+        propSelect.appendChild(opt);
+      });
+
+      // Clear tenant auto fields on address list reset
+      clearTenantFields();
+    }
+
+    function clearTenantFields() {
+      document.getElementById("tenantNameDisplay").value = "";
+      document.getElementById("tenantFatherDisplay").value = "";
+      document.getElementById("tenantCnicDisplay").value = "";
+      document.getElementById("tenantContactDisplay").value = "";
+      document.getElementById("tenantRentDisplay").value = "";
     }
 
     function populateSelect(id, list) {
@@ -515,15 +536,23 @@
       const phoneInput = document.getElementById("contactNo");
       const partyTypeSelect = document.getElementById("partyType");
 
-      if(m.subCategory === "Shop Rent" || m.subCategory === "Doctor Chamber Rent") {
+      if(m.subCategory === "Shop Rent") {
         rentalBox.classList.remove("hidden");
         phoneInput.disabled = true;
         phoneInput.value = "";
         partyTypeSelect.value = "Tenant";
+        filterPropertyAddressDropdown("Shop"); // Filter addresses for Shop
+      } else if(m.subCategory === "Doctor Chamber Rent") {
+        rentalBox.classList.remove("hidden");
+        phoneInput.disabled = true;
+        phoneInput.value = "";
+        partyTypeSelect.value = "Tenant";
+        filterPropertyAddressDropdown("Doctor Chamber"); // Filter addresses for Doctor Chamber
       } else {
         rentalBox.classList.add("hidden");
         const isExpense = document.getElementById("txnType").value.toLowerCase().includes("expense");
         phoneInput.disabled = isExpense;
+        filterPropertyAddressDropdown(); // Reset address list
       }
     }
 
@@ -537,6 +566,8 @@
         document.getElementById("tenantContactDisplay").value = match.contact;
         document.getElementById("tenantRentDisplay").value = match.monthlyRent;
         document.getElementById("partyName").value = match.tenantName;
+      } else {
+        clearTenantFields();
       }
     }
 
