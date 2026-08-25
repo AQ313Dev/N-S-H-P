@@ -3,731 +3,240 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام الشریعہ انٹری سسٹم</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <title>Nizam-ul-Sharia - Management System</title>
   <style>
-    body { font-family: 'Noto Nastaliq Urdu', serif, sans-serif; }
-    .search-box { position: relative; }
-    .dropdown-list {
-      max-height: 180px; 
-      overflow-y: auto; 
-      border: 1px solid #d1d5db;
-      background: #ffffff; 
-      position: absolute; 
-      top: 100%; 
-      left: 0; 
-      right: 0; 
-      z-index: 999; 
-      display: none;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    }
-    .dropdown-item { padding: 8px 12px; cursor: pointer; direction: ltr; text-align: left; }
-    .dropdown-item:hover { background-color: #f3f4f6; }
-    select, input, textarea { direction: ltr; text-align: left; }
-
-    /* Improved Line Spacing & Receipt Styles */
-    .receipt-copy {
-      line-height: 2.2 !important;
-    }
-    .receipt-row {
-      margin-bottom: 6px !important;
-      display: flex;
-      align-items: center;
-    }
-    .receipt-row-remarks {
-      margin-top: 6px !important;
-      line-height: 1.8 !important;
-    }
-
-    @media print {
-      @page {
-        size: A4 portrait;
-        margin: 5mm;
-      }
-      body * {
-        visibility: hidden;
-      }
-      #printableReceipt, #printableReceipt * {
-        visibility: visible;
-      }
-      #printableReceipt {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: block !important;
-      }
-      .receipt-copy {
-        box-shadow: none !important;
-      }
-    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f5; margin: 0; padding: 20px; direction: rtl; }
+    .container { max-width: 650px; margin: auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eef2f5; padding-bottom: 15px; margin-bottom: 20px; }
+    h2 { margin: 0; color: #2c3e50; font-size: 22px; }
+    .lang-btn { background-color: #007bff; color: white; border: none; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 13px; }
+    .lang-btn:hover { background-color: #0056b3; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; color: #495057; font-size: 14px; }
+    select, input, textarea { width: 100%; padding: 11px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; background-color: #fff; outline: none; transition: border-color 0.2s; }
+    select:focus, input:focus, textarea:focus { border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,0.25); }
+    .submit-btn { width: 100%; padding: 13px; background-color: #28a745; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .submit-btn:hover { background-color: #218838; }
+    .row { display: flex; gap: 15px; }
+    .col { flex: 1; }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-start p-2 sm:p-6">
+<body>
 
-  <!-- Loader overlay -->
-  <div id="loader" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white p-6 rounded-lg shadow-xl text-center space-y-3">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-800 mx-auto"></div>
-      <p class="text-emerald-900 font-bold">برائے مہربانی انتظار کریں...</p>
-    </div>
+<div class="container">
+  <div class="header-bar">
+    <h2 id="lbl-title">نظام الشریعہ - ٹرانزیکشن فارم</h2>
+    <button type="button" class="lang-btn" onclick="toggleLanguage()" id="btn-lang">English</button>
   </div>
 
-  <!-- Welcome Popup Modal -->
-  <div id="welcomeModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center border-2 border-emerald-600 space-y-4 relative">
-      <button onclick="closeWelcomeModal()" class="absolute top-3 left-3 text-gray-400 hover:text-gray-700 font-bold text-lg px-2">✕</button>
-      <div class="text-4xl text-emerald-800 font-bold mb-2">السلام علیکم</div>
-      <div id="modalUserName" class="text-2xl font-bold text-gray-800 border-b pb-3"></div>
-      <div class="text-emerald-900 font-semibold text-lg pt-2 leading-relaxed">
-        اللهم صل على محمد وآل محمد وعجل فرجهم
+  <form id="txnForm">
+    <div class="row">
+      <div class="col form-group">
+        <label id="lbl-dept">شعبہ (Department)</label>
+        <select id="department" required></select>
       </div>
-      <div class="pt-4">
-        <button id="skipBtn" onclick="closeWelcomeModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-8 py-2.5 rounded-lg shadow-md hover:shadow-lg transition">
-          آگے بڑھیں (Skip) - <span id="timerSec">5</span>s
-        </button>
+      <div class="col form-group">
+        <label id="lbl-txntype">نوعیت ٹرانزیکشن (Txn Type)</label>
+        <select id="txnType" required onchange="filterSubCategories()"></select>
       </div>
     </div>
-  </div>
 
-  <!-- Header -->
-  <div class="w-full max-w-4xl bg-emerald-800 text-white p-4 rounded-t-xl shadow-lg flex justify-between items-center">
-    <div class="text-xl font-bold">نظام الشریعہ انٹری سسٹم</div>
-    <div id="userProfileArea" class="hidden relative">
-      <span id="welcomeMsg" class="text-sm font-semibold ml-4"></span>
-      <button onclick="toggleUserMenu()" class="bg-emerald-900 px-3 py-1 rounded text-sm hover:bg-emerald-700">⚙️ Options</button>
-      <div id="userMenu" class="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-xl hidden z-50 border">
-        <button onclick="showChangePassModal()" class="block w-full text-right px-4 py-2 text-sm hover:bg-gray-100 border-b">پاس ورڈ تبدیل کریں</button>
-        <button onclick="logout()" class="block w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100">لاگ آؤٹ</button>
+    <div class="form-group">
+      <label id="lbl-subcat">ذیلی کیٹیگری (Sub Category)</label>
+      <select id="subCategory" required></select>
+    </div>
+
+    <div class="row">
+      <div class="col form-group">
+        <label id="lbl-paymode">ادائیگی کا طریقہ (Payment Mode)</label>
+        <select id="paymentMode" required></select>
+      </div>
+      <div class="col form-group">
+        <label id="lbl-partytype">فریق کی قسم (Party Type)</label>
+        <select id="partyType" required></select>
       </div>
     </div>
-  </div>
 
-  <!-- Login Card -->
-  <div id="loginCard" class="bg-white p-8 rounded-b-xl shadow-lg w-full max-w-md">
-    <h2 class="text-xl font-bold text-center text-emerald-900 mb-6">لاگ ان کریں (Login)</h2>
-    <form onsubmit="handleLogin(event)" class="space-y-4">
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">یوزر نیم</label>
-        <input type="text" id="username" class="w-full p-2 border rounded" required>
+    <div class="row">
+      <div class="col form-group">
+        <label id="lbl-contact">فون نمبر (Donor/Contact No)</label>
+        <input type="text" id="contactNo" placeholder="03001234567" onblur="autoSearchDonor()" />
       </div>
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">پاس ورڈ</label>
-        <input type="password" id="password" class="w-full p-2 border rounded" required>
+      <div class="col form-group">
+        <label id="lbl-partyname">نام (Person/Party Name)</label>
+        <input type="text" id="partyName" required />
       </div>
-      <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-2 rounded font-bold">لاگ ان</button>
-      <div class="text-center mt-2">
-        <button type="button" onclick="handleForgotPass()" class="text-xs text-blue-600 underline">پاس ورڈ بھول گئے؟ (Forgot Password)</button>
-      </div>
-    </form>
-  </div>
+    </div>
 
-  <!-- Main Entry Form -->
-  <div id="formCard" class="bg-white p-6 rounded-b-xl shadow-lg w-full max-w-4xl hidden space-y-4">
-    <h2 class="text-xl font-bold text-emerald-900 border-b pb-2">نئی ٹرانزیکشن انٹری</h2>
+    <div class="form-group">
+      <label id="lbl-amount">رقم (Amount)</label>
+      <input type="number" id="amount" required min="1" />
+    </div>
+
+    <div class="form-group">
+      <label id="lbl-remarks">تفصیل / کیفیات (Remarks)</label>
+      <textarea id="remarks" rows="2"></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn" id="btn-submit">انٹری محفوظ کریں</button>
+  </form>
+</div>
+
+<script>
+  // AAP KA GOOGLE APPS SCRIPT WEB APP URL PURE CODE MEIN YAHAN SET HOGA
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhPqsZzXd3G_UlmgoiMA814M_tSHOUD-yWTelEYo1TtloIMhYCoT7grP0SVfA_TcxhlA/exec";
+
+  let appSettings = {};
+  let currentLang = 'ur'; // Default Urdu
+
+  // Urdu Translation mapping helper
+  function getTranslatedText(englishText) {
+    if (!englishText) return "";
+    if (currentLang === 'ur' && appSettings.translations && appSettings.translations[englishText]) {
+      return appSettings.translations[englishText];
+    }
+    return englishText;
+  }
+
+  // Populate Dropdown Helper
+  function populateSelect(elementId, itemsList) {
+    const select = document.getElementById(elementId);
+    const currentValue = select.value;
+    select.innerHTML = `<option value="">${currentLang === 'ur' ? 'منتخب کریں...' : 'Select...'}</option>`;
     
-    <form id="txnForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">1. تاریخ (Date)</label>
-        <input type="date" id="txnDate" class="w-full p-2 border rounded" required>
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">2. شعبہ (Department)</label>
-        <select id="department" class="w-full p-2 border rounded" required>
-          <option value="">Select Department</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">3. ٹرانزیکشن ٹائپ (Txn Type)</label>
-        <select id="txnType" onchange="onTxnTypeChange()" class="w-full p-2 border rounded" required>
-          <option value="">Select Txn Type</option>
-        </select>
-      </div>
-
-      <div id="categoryContainer">
-        <label class="block text-gray-700 font-bold mb-1">4. کیٹیگری (Category) <span id="catRequiredStar" class="text-red-500 hidden">*</span></label>
-        <select id="categorySelect" onchange="onCategoryChange()" class="w-full p-2 border rounded">
-          <option value="">Select Category</option>
-        </select>
-      </div>
-
-      <div class="search-box">
-        <label class="block text-gray-700 font-bold mb-1">5. ذیلی کیٹیگری (Sub Category)</label>
-        <input type="text" id="subCategorySearch" placeholder="Type to search Sub Category..." oninput="filterSubCatSearch()" onfocus="showSubCatList()" class="w-full p-2 border rounded" autocomplete="off" required>
-        <input type="hidden" id="subCategory">
-        <input type="hidden" id="category">
-        <div id="subCatList" class="dropdown-list shadow-md rounded"></div>
-      </div>
-
-      <!-- Rental Section -->
-      <div id="rentalFields" class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 bg-emerald-50 p-4 rounded-lg border border-emerald-200 hidden">
-        <div>
-          <label class="block text-emerald-900 font-bold mb-1">پراپرٹی ایڈریس (Address)</label>
-          <select id="propertyAddress" onchange="autoFillTenant()" class="w-full p-2 border rounded">
-            <option value="">Select Address</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-emerald-900 font-bold mb-1">کرایہ دار (Tenant Name)</label>
-          <input type="text" id="tenantNameDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Tenant">
-        </div>
-        <div>
-          <label class="block text-emerald-900 font-bold mb-1">ولدیت (Father Name)</label>
-          <input type="text" id="tenantFatherDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Father">
-        </div>
-        <div>
-          <label class="block text-emerald-900 font-bold mb-1">CNIC</label>
-          <input type="text" id="tenantCnicDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto CNIC">
-        </div>
-        <div>
-          <label class="block text-emerald-900 font-bold mb-1">Contact</label>
-          <input type="text" id="tenantContactDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Contact">
-        </div>
-        <div>
-          <label class="block text-emerald-900 font-bold mb-1">ماہانہ طے شدہ کرایہ</label>
-          <input type="text" id="tenantRentDisplay" class="w-full p-2 border rounded bg-gray-100 font-bold text-emerald-800" readonly placeholder="0">
-        </div>
-        <div>
-          <label class="block text-emerald-900 font-bold mb-1">معاہدہ کی آخری تاریخ (Lease End)</label>
-          <input type="text" id="tenantLeaseEndDisplay" class="w-full p-2 border rounded bg-gray-100 font-bold text-red-700" readonly placeholder="Auto Lease End">
-        </div>
-        <div>
-          <label class="block text-emerald-900 font-bold mb-1">کرایہ کا مہینہ (Month)</label>
-          <select id="rentMonth" class="w-full p-2 border rounded">
-            <option value="">Select Month</option>
-            <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
-            <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
-            <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
-            <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-emerald-900 font-bold mb-1">سال (Year)</label>
-          <input type="number" id="rentYear" min="2000" max="2100" placeholder="e.g. 2026" class="w-full p-2 border rounded" value="2026">
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">فون نمبر / Donor Search</label>
-        <input type="text" id="contactNo" onblur="lookupDonor()" class="w-full p-2 border rounded" placeholder="Type phone for Donor search">
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">پارٹی ٹائپ (Party Type)</label>
-        <select id="partyType" class="w-full p-2 border rounded" required>
-          <option value="">Select Party Type</option>
-        </select>
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="block text-gray-700 font-bold mb-1">شخص / پارٹی کا نام (Name)</label>
-        <input type="text" id="partyName" class="w-full p-2 border rounded" placeholder="Person / Party / Donor Name" required>
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">ادائیگی کا طریقہ (Payment Mode)</label>
-        <select id="paymentMode" class="w-full p-2 border rounded" required>
-          <option value="">Select Mode</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-bold mb-1">رقم (Amount PKR)</label>
-        <input type="number" id="amount" class="w-full p-2 border rounded" required>
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="block text-gray-700 font-bold mb-1">تفصیل / ریمارکس (Remarks)</label>
-        <textarea id="remarks" class="w-full p-2 border rounded" rows="2"></textarea>
-      </div>
-
-      <div class="md:col-span-2 grid grid-cols-2 gap-4 mt-2">
-        <button type="button" onclick="submitData(false)" class="bg-emerald-700 hover:bg-emerald-800 text-white py-3 rounded font-bold">محفوظ کریں (Save Only)</button>
-        <button type="button" onclick="submitData(true)" class="bg-blue-700 hover:bg-blue-800 text-white py-3 rounded font-bold">محفوظ اور پرنٹ کریں (Save & Print)</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Change Password Modal -->
-  <div id="changePassModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm space-y-4 text-right">
-      <h3 class="text-lg font-bold border-b pb-2">پاس ورڈ تبدیل کریں</h3>
-      <div>
-        <label class="block text-xs font-bold mb-1">نیا پاس ورڈ</label>
-        <input type="password" id="newPassword" class="w-full p-2 border rounded">
-      </div>
-      <div class="flex justify-end gap-2">
-        <button onclick="hideChangePassModal()" class="px-3 py-1 bg-gray-300 rounded">کینسل</button>
-        <button onclick="submitNewPassword()" class="px-3 py-1 bg-emerald-700 text-white rounded">اپڈیٹ کریں</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Dynamic Receipt Template (A4 Top - 2 Copies Layout) -->
-  <div id="printableReceipt" class="hidden w-full" dir="rtl">
-    <div class="grid grid-cols-2 gap-3 w-full">
-      
-      <!-- Depositor Copy -->
-      <div class="receipt-copy border border-gray-400 p-3 rounded text-right text-[11px] flex flex-col justify-between">
-        <div>
-          <div class="text-left font-bold text-[10px] text-gray-600 border-b pb-0.5">Depositor Copy</div>
-          <div class="text-center border-b pb-1 my-1">
-            <h1 class="text-lg font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
-            <p class="text-xs text-gray-700" id="receiptTitle1">رسید بابت موصولی</p>
-          </div>
-          <div class="flex justify-between border-b pb-1 mb-2 text-[10px]">
-            <span><strong>رسید نمبر:</strong> <span class="rReceiptNo"></span></span>
-            <span><strong>پرنٹنگ:</strong> <span class="rPrintDateTime"></span></span>
-          </div>
-          <div class="receiptContent"></div>
-        </div>
-        <div class="mt-4 flex justify-between items-end text-[9px] text-gray-700 pt-1 border-t">
-          <div>
-            <p><strong>انٹری کنندہ:</strong> <span class="rEnteredBy"></span></p>
-          </div>
-          <div>
-            <p>دستخط وصول کنندہ: _________</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Nizam ul Sharia Copy -->
-      <div class="receipt-copy border border-gray-400 p-3 rounded text-right text-[11px] flex flex-col justify-between">
-        <div>
-          <div class="text-left font-bold text-[10px] text-gray-600 border-b pb-0.5">Nizam ul Sharia Copy</div>
-          <div class="text-center border-b pb-1 my-1">
-            <h1 class="text-lg font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
-            <p class="text-xs text-gray-700" id="receiptTitle2">رسید بابت موصولی</p>
-          </div>
-          <div class="flex justify-between border-b pb-1 mb-2 text-[10px]">
-            <span><strong>رسید نمبر:</strong> <span class="rReceiptNo"></span></span>
-            <span><strong>پرنٹنگ:</strong> <span class="rPrintDateTime"></span></span>
-          </div>
-          <div class="receiptContent"></div>
-        </div>
-        <div class="mt-4 flex justify-between items-end text-[9px] text-gray-700 pt-1 border-t">
-          <div>
-            <p><strong>انٹری کنندہ:</strong> <span class="rEnteredBy"></span></p>
-          </div>
-          <div>
-            <p>دستخط وصول کنندہ: _________</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhPqsZzXd3G_UlmgoiMA814M_tSHOUD-yWTelEYo1TtloIMhYCoT7grP0SVfA_TcxhlA/exec";
-    let allMappings = [], filteredMappings = [], propertyMap = [], currentUser = "", activeUsername = "";
-    let welcomeTimer = null, timerInterval = null;
-
-    function showLoader() { document.getElementById("loader").classList.remove("hidden"); }
-    function hideLoader() { document.getElementById("loader").classList.add("hidden"); }
-
-    async function handleLogin(e) {
-      e.preventDefault();
-      showLoader();
-      const u = document.getElementById("username").value;
-      const p = document.getElementById("password").value;
-      
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
-        const data = await res.json();
-        hideLoader();
-        if(data.status === "success") {
-          currentUser = data.fullName || u;
-          activeUsername = u;
-          
-          document.getElementById("welcomeMsg").innerText = `السلام علیکم، ${currentUser}`;
-          document.getElementById("userProfileArea").classList.remove("hidden");
-          document.getElementById("loginCard").classList.add("hidden");
-          document.getElementById("formCard").classList.remove("hidden");
-          document.getElementById("txnDate").valueAsDate = new Date();
-          
-          showWelcomePopup(currentUser);
-          loadFormOptions();
-        } else { alert("غلط یوزر نیم یا پاس ورڈ!"); }
-      } catch(err) { hideLoader(); alert("Error connecting to server!"); }
-    }
-
-    function showWelcomePopup(name) {
-      document.getElementById("modalUserName").innerText = name;
-      document.getElementById("welcomeModal").classList.remove("hidden");
-
-      let timeLeft = 5;
-      document.getElementById("timerSec").innerText = timeLeft;
-
-      if(timerInterval) clearInterval(timerInterval);
-      if(welcomeTimer) clearTimeout(welcomeTimer);
-
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        if(timeLeft >= 0) {
-          document.getElementById("timerSec").innerText = timeLeft;
-        }
-      }, 1000);
-
-      welcomeTimer = setTimeout(() => {
-        closeWelcomeModal();
-      }, 5000);
-    }
-
-    function closeWelcomeModal() {
-      if(timerInterval) clearInterval(timerInterval);
-      if(welcomeTimer) clearTimeout(welcomeTimer);
-      document.getElementById("welcomeModal").classList.add("hidden");
-    }
-
-    async function handleForgotPass() {
-      const u = prompt("اپنا یوزر نیم درج کریں:");
-      if(u) {
-        showLoader();
-        try {
-          const res = await fetch(`${SCRIPT_URL}?action=forgotPassword&username=${encodeURIComponent(u)}`);
-          const data = await res.json();
-          hideLoader();
-          if(data.status === "success") {
-            alert("پاس ورڈ ری سیٹ کی درخواست ای میل کر دی گئی ہے۔");
-          } else {
-            alert("ای میل بھیجنے میں مسئلہ آیا: " + data.message);
-          }
-        } catch(e) { hideLoader(); alert("Error processing request!"); }
-      }
-    }
-
-    function toggleUserMenu() { document.getElementById("userMenu").classList.toggle("hidden"); }
-    function showChangePassModal() { toggleUserMenu(); document.getElementById("changePassModal").classList.remove("hidden"); }
-    function hideChangePassModal() { document.getElementById("changePassModal").classList.add("hidden"); }
-
-    async function submitNewPassword() {
-      const newP = document.getElementById("newPassword").value;
-      if(!newP) return;
-      showLoader();
-      const res = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "changePassword", username: activeUsername, newPassword: newP })
-      });
-      hideLoader();
-      hideChangePassModal();
-      alert("پاس ورڈ کامیابی سے تبدیل ہو گیا ہے!");
-    }
-
-    function logout() { location.reload(); }
-
-    async function loadFormOptions() {
-      showLoader();
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=getSettings`);
-        const data = await res.json();
-        hideLoader();
-        allMappings = data.mappings || [];
-        propertyMap = data.propertyTenantMap || [];
-        populateSelect("department", data.departments);
-        populateSelect("txnType", data.txnTypes);
-        populateSelect("partyType", data.partyTypes);
-        populateSelect("paymentMode", data.paymentModes);
-
-        filterPropertyAddressDropdown();
-      } catch(e) {
-        hideLoader();
-        alert("Settings load karne mein masla aya!");
-      }
-    }
-
-    function filterPropertyAddressDropdown(filterType) {
-      const propSelect = document.getElementById("propertyAddress");
-      propSelect.innerHTML = '<option value="">Select Address</option>';
-
-      let filteredList = propertyMap;
-      if (filterType) {
-        filteredList = propertyMap.filter(p => p.propertyType.toLowerCase() === filterType.toLowerCase());
-      }
-
-      filteredList.forEach(p => {
-        let opt = document.createElement("option");
-        opt.value = p.address; 
-        opt.innerText = p.address;
-        propSelect.appendChild(opt);
-      });
-
-      clearTenantFields();
-    }
-
-    function clearTenantFields() {
-      document.getElementById("tenantNameDisplay").value = "";
-      document.getElementById("tenantFatherDisplay").value = "";
-      document.getElementById("tenantCnicDisplay").value = "";
-      document.getElementById("tenantContactDisplay").value = "";
-      document.getElementById("tenantRentDisplay").value = "";
-      document.getElementById("tenantLeaseEndDisplay").value = "";
-    }
-
-    function populateSelect(id, list) {
-      const el = document.getElementById(id);
-      el.innerHTML = '<option value="">Select Option</option>';
-      if(list) list.forEach(item => {
-        let opt = document.createElement("option");
-        opt.value = item; opt.innerText = item;
-        el.appendChild(opt);
-      });
-    }
-
-    async function lookupDonor() {
-      const phoneInput = document.getElementById("contactNo");
-      const phone = phoneInput.value;
-      if(phone.length >= 5 && !phoneInput.disabled) {
-        showLoader();
-        try {
-          const res = await fetch(`${SCRIPT_URL}?action=searchDonor&phone=${encodeURIComponent(phone)}`);
-          const data = await res.json();
-          hideLoader();
-          if(data.status === "success" && data.name) {
-            document.getElementById("partyName").value = data.name;
-          }
-        } catch(e) { hideLoader(); }
-      }
-    }
-
-    function onTxnTypeChange() {
-      const selectedTxn = document.getElementById("txnType").value;
-      const categorySelect = document.getElementById("categorySelect");
-      const catRequiredStar = document.getElementById("catRequiredStar");
-      const phoneInput = document.getElementById("contactNo");
-
-      categorySelect.value = "";
-      document.getElementById("subCategorySearch").value = "";
-      document.getElementById("subCategory").value = "";
-      document.getElementById("category").value = "";
-
-      const isExpense = selectedTxn.toLowerCase().includes("expense") || selectedTxn.toLowerCase().includes("اخراجات");
-
-      if (isExpense) {
-        categorySelect.required = true;
-        catRequiredStar.classList.remove("hidden");
-        phoneInput.disabled = true;
-        phoneInput.value = "";
-
-        const expenseCategories = Array.from(new Set(
-          allMappings.filter(m => m.txnType.toLowerCase().includes("expense") || m.txnType.toLowerCase().includes("اخراجات"))
-                     .map(m => m.category)
-                     .filter(Boolean)
-        ));
-        populateSelect("categorySelect", expenseCategories);
-        filteredMappings = [];
-      } else {
-        categorySelect.required = false;
-        catRequiredStar.classList.add("hidden");
-        phoneInput.disabled = false;
-
-        const txnCategories = Array.from(new Set(
-          allMappings.filter(m => m.txnType === selectedTxn).map(m => m.category).filter(Boolean)
-        ));
-        populateSelect("categorySelect", txnCategories);
-
-        filteredMappings = allMappings.filter(m => m.txnType === selectedTxn);
-      }
-      renderSubCatList(filteredMappings);
-    }
-
-    function onCategoryChange() {
-      const selectedTxn = document.getElementById("txnType").value;
-      const selectedCat = document.getElementById("categorySelect").value;
-
-      document.getElementById("category").value = selectedCat;
-      document.getElementById("subCategorySearch").value = "";
-      document.getElementById("subCategory").value = "";
-
-      if (selectedCat) {
-        filteredMappings = allMappings.filter(m => 
-          (m.txnType === selectedTxn || m.txnType.toLowerCase().includes("expense")) && m.category === selectedCat
-        );
-      } else {
-        filteredMappings = allMappings.filter(m => m.txnType === selectedTxn);
-      }
-      renderSubCatList(filteredMappings);
-    }
-
-    function filterSubCatSearch() {
-      const q = document.getElementById("subCategorySearch").value.toLowerCase();
-      const listToFilter = filteredMappings.length > 0 ? filteredMappings : allMappings;
-      const list = listToFilter.filter(m => m.subCategory.toLowerCase().includes(q));
-      renderSubCatList(list);
-      showSubCatList();
-    }
-
-    function renderSubCatList(list) {
-      const container = document.getElementById("subCatList");
-      container.innerHTML = "";
-      list.forEach(m => {
-        let div = document.createElement("div");
-        div.className = "dropdown-item";
-        div.innerText = m.subCategory;
-        div.onclick = () => selectSubCategory(m);
-        container.appendChild(div);
-      });
-    }
-
-    function showSubCatList() { document.getElementById("subCatList").style.display = "block"; }
-
-    document.addEventListener("click", function(e) {
-      if (!e.target.closest(".search-box")) {
-        document.getElementById("subCatList").style.display = "none";
-      }
+    itemsList.forEach(item => {
+      let option = document.createElement('option');
+      option.value = item; // Backend Value (English)
+      option.innerText = getTranslatedText(item); // UI Label (Urdu/English)
+      select.appendChild(option);
     });
+    
+    if(currentValue) select.value = currentValue;
+  }
 
-    function selectSubCategory(m) {
-      document.getElementById("subCategorySearch").value = m.subCategory;
-      document.getElementById("subCategory").value = m.subCategory;
-      document.getElementById("category").value = m.category || document.getElementById("categorySelect").value;
-      document.getElementById("subCatList").style.display = "none";
-
-      const rentalBox = document.getElementById("rentalFields");
-      const phoneInput = document.getElementById("contactNo");
-      const partyTypeSelect = document.getElementById("partyType");
-
-      if(m.subCategory === "Shop Rent") {
-        rentalBox.classList.remove("hidden");
-        phoneInput.disabled = true;
-        phoneInput.value = "";
-        partyTypeSelect.value = "Tenant";
-        filterPropertyAddressDropdown("Shop");
-      } else if(m.subCategory === "Doctor Chamber Rent") {
-        rentalBox.classList.remove("hidden");
-        phoneInput.disabled = true;
-        phoneInput.value = "";
-        partyTypeSelect.value = "Tenant";
-        filterPropertyAddressDropdown("Doctor Chamber");
-      } else {
-        rentalBox.classList.add("hidden");
-        const isExpense = document.getElementById("txnType").value.toLowerCase().includes("expense");
-        phoneInput.disabled = isExpense;
-        filterPropertyAddressDropdown();
-      }
-    }
-
-    function autoFillTenant() {
-      const addr = document.getElementById("propertyAddress").value;
-      const match = propertyMap.find(p => p.address === addr);
-      if(match) {
-        document.getElementById("tenantNameDisplay").value = match.tenantName;
-        document.getElementById("tenantFatherDisplay").value = match.fatherName;
-        document.getElementById("tenantCnicDisplay").value = match.cnic;
-        document.getElementById("tenantContactDisplay").value = match.contact;
-        document.getElementById("tenantRentDisplay").value = match.monthlyRent;
-        document.getElementById("tenantLeaseEndDisplay").value = match.leaseEndDate || "-";
-        document.getElementById("partyName").value = match.tenantName;
-      } else {
-        clearTenantFields();
-      }
-    }
-
-    async function submitData(shouldPrint) {
-      const txnTypeVal = document.getElementById("txnType").value;
-      const isExpense = (txnTypeVal.toLowerCase().includes("expense") || txnTypeVal.toLowerCase().includes("اخراجات"));
-      const catVal = document.getElementById("categorySelect").value || document.getElementById("category").value;
-
-      if (isExpense && !catVal) {
-        alert("برائے مہربانی پہلے Category منتخب کریں!");
-        return;
-      }
-
-      const subCat = document.getElementById("subCategory").value;
-      if (!subCat) {
-        alert("برائے مہربانی Sub Category منتخب کریں!");
-        return;
-      }
-
-      const isRent = (subCat === "Shop Rent" || subCat === "Doctor Chamber Rent");
-      const monthVal = document.getElementById("rentMonth").value;
-      let yearVal = document.getElementById("rentYear").value;
-
-      if(isRent && (!yearVal || isNaN(yearVal) || yearVal.length !== 4)) {
-        alert("برائے مہربانی درست سال درج کریں (مثلاً 2026)");
-        return;
-      }
-
-      const remarksVal = document.getElementById("remarks").value;
-
-      const payload = {
-        date: document.getElementById("txnDate").value,
-        department: document.getElementById("department").value,
-        txnType: txnTypeVal,
-        category: catVal,
-        subCategory: subCat,
-        partyType: document.getElementById("partyType").value,
-        partyName: document.getElementById("partyName").value,
-        propertyAddress: isRent ? document.getElementById("propertyAddress").value : "",
-        rentMonthYear: isRent ? `${monthVal}-${yearVal}` : "",
-        paymentMode: document.getElementById("paymentMode").value,
-        amount: document.getElementById("amount").value,
-        remarks: remarksVal,
-        enteredBy: currentUser,
-        shouldPrint: shouldPrint,
-        contactNo: document.getElementById("contactNo").value
-      };
-
-      showLoader();
-      const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-      const data = await res.json();
-      hideLoader();
-      
-      if(data.status === "success") {
-        if(shouldPrint) {
-          document.querySelectorAll(".rReceiptNo").forEach(e => e.innerText = data.receiptNo);
-          document.querySelectorAll(".rPrintDateTime").forEach(e => e.innerText = data.printDateTime);
-          document.querySelectorAll(".rEnteredBy").forEach(e => e.innerText = currentUser);
-
-          const rTitle1 = document.getElementById("receiptTitle1");
-          const rTitle2 = document.getElementById("receiptTitle2");
-
-          if (isRent) {
-            rTitle1.innerText = "رسید بابت ماہانہ کرایہ";
-            rTitle2.innerText = "رسید بابت ماہانہ کرایہ";
-          } else if (isExpense) {
-            rTitle1.innerText = "رسید بابت ادائیگی";
-            rTitle2.innerText = "رسید بابت ادائیگی";
-          } else {
-            rTitle1.innerText = "رسید بابت موصولی";
-            rTitle2.innerText = "رسید بابت موصولی";
-          }
-
-          let contentHtml = `
-            <div class="receipt-row"><strong>تاریخ ٹرانزیکشن:</strong>&nbsp;${payload.date}</div>
-            <div class="receipt-row"><strong>شعبہ / کیٹیگری:</strong>&nbsp;${payload.department} (${payload.category} / ${payload.subCategory})</div>
-            <div class="receipt-row"><strong>وصول شدہ رقم از:</strong>&nbsp;${payload.partyName} (${payload.partyType})</div>
-            ${isRent ? `<div class="receipt-row"><strong>پراپرٹی ایڈریس:</strong>&nbsp;${payload.propertyAddress}</div><div class="receipt-row"><strong>کرایہ برائے ماہ:</strong>&nbsp;${payload.rentMonthYear}</div>` : ''}
-            <div class="receipt-row"><strong>ادائیگی کا طریقہ:</strong>&nbsp;${payload.paymentMode}</div>
-            <div class="receipt-row text-sm font-bold text-emerald-900 border-t border-b my-1 py-1"><strong>کل رقم:</strong>&nbsp;PKR ${payload.amount}/-</div>
-            <div class="receipt-row-remarks"><strong>تفصیل / ریمارکس:</strong>&nbsp;${remarksVal ? remarksVal : '-'}</div>
-          `;
-
-          document.querySelectorAll(".receiptContent").forEach(e => e.innerHTML = contentHtml);
-          
-          const receiptEl = document.getElementById("printableReceipt");
-          receiptEl.classList.remove("hidden");
-          window.print();
-          receiptEl.classList.add("hidden");
-        } else {
-          alert("انٹری کامیابی سے محفوظ ہو گئی ہے!");
+  // Fetch Settings via API URL
+  function loadSettings() {
+    fetch(`${SCRIPT_URL}?action=getSettings`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          appSettings = data;
+          renderAllDropdowns();
         }
-        
-        document.getElementById("txnForm").reset();
-        document.getElementById("subCategorySearch").value = "";
-        document.getElementById("rentalFields").classList.add("hidden");
-        document.getElementById("contactNo").disabled = false;
-        document.getElementById("catRequiredStar").classList.add("hidden");
-        document.getElementById("txnDate").valueAsDate = new Date();
+      })
+      .catch(err => console.error("Settings load error:", err));
+  }
+
+  // Render All Dropdowns
+  function renderAllDropdowns() {
+    populateSelect('department', appSettings.departments || []);
+    populateSelect('txnType', appSettings.txnTypes || []);
+    populateSelect('paymentMode', appSettings.paymentModes || []);
+    populateSelect('partyType', appSettings.partyTypes || []);
+    filterSubCategories();
+  }
+
+  // Filter Sub-Categories dynamically based on Selected Txn Type
+  function filterSubCategories() {
+    const selectedTxn = document.getElementById('txnType').value;
+    let filteredSubCats = [];
+
+    if (appSettings.mappings) {
+      if (selectedTxn) {
+        filteredSubCats = appSettings.mappings
+          .filter(m => m.txnType === selectedTxn)
+          .map(m => m.subCategory);
       } else {
-        alert("انٹری محفوظ کرنے میں مسئلہ آیا!");
+        filteredSubCats = appSettings.mappings.map(m => m.subCategory);
       }
     }
-  </script>
+    populateSelect('subCategory', Array.from(new Set(filteredSubCats)));
+  }
+
+  // Auto Search Donor Name by Phone Number
+  function autoSearchDonor() {
+    const phone = document.getElementById('contactNo').value;
+    if (phone.length >= 7) {
+      fetch(`${SCRIPT_URL}?action=searchDonor&phone=${encodeURIComponent(phone)}`)
+        .then(res => res.json())
+        .then(result => {
+          if (result.status === "success" && result.name) {
+            document.getElementById('partyName').value = result.name;
+          }
+        })
+        .catch(err => console.error("Search donor error:", err));
+    }
+  }
+
+  // Switch Language Urdu / English
+  function toggleLanguage() {
+    currentLang = currentLang === 'ur' ? 'en' : 'ur';
+    document.body.dir = currentLang === 'ur' ? 'rtl' : 'ltr';
+    document.getElementById('btn-lang').innerText = currentLang === 'ur' ? 'English' : 'اردو';
+    
+    document.getElementById('lbl-title').innerText = currentLang === 'ur' ? 'نظام الشریعہ - ٹرانزیکشن فارم' : 'Nizam-ul-Sharia - Transaction Form';
+    document.getElementById('lbl-dept').innerText = currentLang === 'ur' ? 'شعبہ (Department)' : 'Department';
+    document.getElementById('lbl-txntype').innerText = currentLang === 'ur' ? 'نوعیت ٹرانزیکشن (Txn Type)' : 'Transaction Type';
+    document.getElementById('lbl-subcat').innerText = currentLang === 'ur' ? 'ذیلی کیٹیگری (Sub Category)' : 'Sub Category';
+    document.getElementById('lbl-paymode').innerText = currentLang === 'ur' ? 'ادائیگی کا طریقہ (Payment Mode)' : 'Payment Mode';
+    document.getElementById('lbl-partytype').innerText = currentLang === 'ur' ? 'فریق کی قسم (Party Type)' : 'Party Type';
+    document.getElementById('lbl-contact').innerText = currentLang === 'ur' ? 'فون نمبر (Donor/Contact No)' : 'Contact No';
+    document.getElementById('lbl-partyname').innerText = currentLang === 'ur' ? 'نام (Person/Party Name)' : 'Person/Party Name';
+    document.getElementById('lbl-amount').innerText = currentLang === 'ur' ? 'رقم (Amount)' : 'Amount';
+    document.getElementById('lbl-remarks').innerText = currentLang === 'ur' ? 'تفصیل / کیفیات (Remarks)' : 'Remarks';
+    document.getElementById('btn-submit').innerText = currentLang === 'ur' ? 'انٹری محفوظ کریں' : 'Save Entry';
+
+    renderAllDropdowns();
+  }
+
+  // Form Submit Handler
+  document.getElementById('txnForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const subCat = document.getElementById('subCategory').value;
+    const matchedMap = (appSettings.mappings || []).find(m => m.subCategory === subCat);
+    const categoryName = matchedMap ? matchedMap.category : "";
+
+    const payload = {
+      department: document.getElementById('department').value,
+      txnType: document.getElementById('txnType').value,
+      category: categoryName,
+      subCategory: subCat,
+      paymentMode: document.getElementById('paymentMode').value,
+      partyType: document.getElementById('partyType').value,
+      partyName: document.getElementById('partyName').value,
+      contactNo: document.getElementById('contactNo').value,
+      amount: document.getElementById('amount').value,
+      remarks: document.getElementById('remarks').value,
+      propertyAddress: "",
+      rentMonthYear: "",
+      date: new Date().toLocaleDateString('en-GB'),
+      enteredBy: "User",
+      shouldPrint: false
+    };
+
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(result => {
+      if (result.status === "success") {
+        alert((currentLang === 'ur' ? "انٹری کامیابی سے محفوظ ہو گئی ہے! رسید نمبر: " : "Entry Saved Successfully! Receipt No: ") + result.receiptNo);
+        document.getElementById('txnForm').reset();
+      } else {
+        alert(currentLang === 'ur' ? "خرابی: انٹری محفوظ نہیں ہو سکی۔" : "Error: Could not save entry.");
+      }
+    })
+    .catch(err => {
+      console.error("Submit error:", err);
+      alert("Network Error!");
+    });
+  });
+
+  window.onload = loadSettings;
+</script>
+
 </body>
 </html>
