@@ -26,6 +26,20 @@
     .dropdown-item:hover { background-color: #f3f4f6; }
     select, input, textarea { direction: ltr; text-align: left; }
 
+    /* Improved Line Spacing & Receipt Styles */
+    .receipt-copy {
+      line-height: 2.2 !important;
+    }
+    .receipt-row {
+      margin-bottom: 6px !important;
+      display: flex;
+      align-items: center;
+    }
+    .receipt-row-remarks {
+      margin-top: 6px !important;
+      line-height: 1.8 !important;
+    }
+
     @media print {
       @page {
         size: A4 portrait;
@@ -179,6 +193,10 @@
           <input type="text" id="tenantRentDisplay" class="w-full p-2 border rounded bg-gray-100 font-bold text-emerald-800" readonly placeholder="0">
         </div>
         <div>
+          <label class="block text-emerald-900 font-bold mb-1">معاہدہ کی آخری تاریخ (Lease End)</label>
+          <input type="text" id="tenantLeaseEndDisplay" class="w-full p-2 border rounded bg-gray-100 font-bold text-red-700" readonly placeholder="Auto Lease End">
+        </div>
+        <div>
           <label class="block text-emerald-900 font-bold mb-1">کرایہ کا مہینہ (Month)</label>
           <select id="rentMonth" class="w-full p-2 border rounded">
             <option value="">Select Month</option>
@@ -252,23 +270,23 @@
 
   <!-- Dynamic Receipt Template (A4 Top - 2 Copies Layout) -->
   <div id="printableReceipt" class="hidden w-full" dir="rtl">
-    <div class="grid grid-cols-2 gap-2 w-full">
+    <div class="grid grid-cols-2 gap-3 w-full">
       
       <!-- Depositor Copy -->
-      <div class="receipt-copy border border-gray-400 p-3 rounded text-right text-[11px] leading-snug flex flex-col justify-between">
+      <div class="receipt-copy border border-gray-400 p-3 rounded text-right text-[11px] flex flex-col justify-between">
         <div>
           <div class="text-left font-bold text-[10px] text-gray-600 border-b pb-0.5">Depositor Copy</div>
           <div class="text-center border-b pb-1 my-1">
             <h1 class="text-lg font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
             <p class="text-xs text-gray-700" id="receiptTitle1">رسید بابت موصولی</p>
           </div>
-          <div class="flex justify-between border-b pb-1 mb-1 text-[10px]">
+          <div class="flex justify-between border-b pb-1 mb-2 text-[10px]">
             <span><strong>رسید نمبر:</strong> <span class="rReceiptNo"></span></span>
             <span><strong>پرنٹنگ:</strong> <span class="rPrintDateTime"></span></span>
           </div>
-          <div class="receiptContent space-y-0.5"></div>
+          <div class="receiptContent"></div>
         </div>
-        <div class="mt-2 flex justify-between items-end text-[9px] text-gray-700 pt-1 border-t">
+        <div class="mt-4 flex justify-between items-end text-[9px] text-gray-700 pt-1 border-t">
           <div>
             <p><strong>انٹری کنندہ:</strong> <span class="rEnteredBy"></span></p>
           </div>
@@ -279,20 +297,20 @@
       </div>
 
       <!-- Nizam ul Sharia Copy -->
-      <div class="receipt-copy border border-gray-400 p-3 rounded text-right text-[11px] leading-snug flex flex-col justify-between">
+      <div class="receipt-copy border border-gray-400 p-3 rounded text-right text-[11px] flex flex-col justify-between">
         <div>
           <div class="text-left font-bold text-[10px] text-gray-600 border-b pb-0.5">Nizam ul Sharia Copy</div>
           <div class="text-center border-b pb-1 my-1">
             <h1 class="text-lg font-bold text-emerald-900 tracking-wide">نظام الشریعہ حیدرآباد</h1>
             <p class="text-xs text-gray-700" id="receiptTitle2">رسید بابت موصولی</p>
           </div>
-          <div class="flex justify-between border-b pb-1 mb-1 text-[10px]">
+          <div class="flex justify-between border-b pb-1 mb-2 text-[10px]">
             <span><strong>رسید نمبر:</strong> <span class="rReceiptNo"></span></span>
             <span><strong>پرنٹنگ:</strong> <span class="rPrintDateTime"></span></span>
           </div>
-          <div class="receiptContent space-y-0.5"></div>
+          <div class="receiptContent"></div>
         </div>
-        <div class="mt-2 flex justify-between items-end text-[9px] text-gray-700 pt-1 border-t">
+        <div class="mt-4 flex justify-between items-end text-[9px] text-gray-700 pt-1 border-t">
           <div>
             <p><strong>انٹری کنندہ:</strong> <span class="rEnteredBy"></span></p>
           </div>
@@ -448,6 +466,7 @@
       document.getElementById("tenantCnicDisplay").value = "";
       document.getElementById("tenantContactDisplay").value = "";
       document.getElementById("tenantRentDisplay").value = "";
+      document.getElementById("tenantLeaseEndDisplay").value = "";
     }
 
     function populateSelect(id, list) {
@@ -602,6 +621,7 @@
         document.getElementById("tenantCnicDisplay").value = match.cnic;
         document.getElementById("tenantContactDisplay").value = match.contact;
         document.getElementById("tenantRentDisplay").value = match.monthlyRent;
+        document.getElementById("tenantLeaseEndDisplay").value = match.leaseEndDate || "-";
         document.getElementById("partyName").value = match.tenantName;
       } else {
         clearTenantFields();
@@ -679,13 +699,13 @@
           }
 
           let contentHtml = `
-            <p><strong>تاریخ ٹرانزیکشن:</strong> ${payload.date}</p>
-            <p><strong>شعبہ / کیٹیگری:</strong> ${payload.department} (${payload.category} / ${payload.subCategory})</p>
-            <p><strong>وصول شدہ رقم از:</strong> ${payload.partyName} (${payload.partyType})</p>
-            ${isRent ? `<p><strong>پراپرٹی ایڈریس:</strong> ${payload.propertyAddress}</p><p><strong>کرایہ برائے ماہ:</strong> ${payload.rentMonthYear}</p>` : ''}
-            <p><strong>ادائیگی کا طریقہ:</strong> ${payload.paymentMode}</p>
-            <p class="text-sm font-bold text-emerald-900 border-t border-b my-0.5 py-0.5"><strong>کل رقم:</strong> PKR ${payload.amount}/-</p>
-            ${remarksVal ? `<p><strong>تفصیل / ریمارکس:</strong> ${remarksVal}</p>` : `<p><strong>تفصیل / رymارکس:</strong> -</p>`}
+            <div class="receipt-row"><strong>تاریخ ٹرانزیکشن:</strong>&nbsp;${payload.date}</div>
+            <div class="receipt-row"><strong>شعبہ / کیٹیگری:</strong>&nbsp;${payload.department} (${payload.category} / ${payload.subCategory})</div>
+            <div class="receipt-row"><strong>وصول شدہ رقم از:</strong>&nbsp;${payload.partyName} (${payload.partyType})</div>
+            ${isRent ? `<div class="receipt-row"><strong>پراپرٹی ایڈریس:</strong>&nbsp;${payload.propertyAddress}</div><div class="receipt-row"><strong>کرایہ برائے ماہ:</strong>&nbsp;${payload.rentMonthYear}</div>` : ''}
+            <div class="receipt-row"><strong>ادائیگی کا طریقہ:</strong>&nbsp;${payload.paymentMode}</div>
+            <div class="receipt-row text-sm font-bold text-emerald-900 border-t border-b my-1 py-1"><strong>کل رقم:</strong>&nbsp;PKR ${payload.amount}/-</div>
+            <div class="receipt-row-remarks"><strong>تفصیل / ریمارکس:</strong>&nbsp;${remarksVal ? remarksVal : '-'}</div>
           `;
 
           document.querySelectorAll(".receiptContent").forEach(e => e.innerHTML = contentHtml);
