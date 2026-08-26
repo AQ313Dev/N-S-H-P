@@ -26,7 +26,6 @@
     .dropdown-item:hover { background-color: #f3f4f6; }
     select, input, textarea { direction: ltr; text-align: left; }
 
-    /* Improved Line Spacing & Receipt Styles */
     .receipt-copy {
       line-height: 2.2 !important;
     }
@@ -612,6 +611,17 @@
       }
     }
 
+    function formatDateDisplay(dateStr) {
+      if(!dateStr) return "-";
+      if(dateStr.includes("GMT") || dateStr.includes("00:00:00")) {
+        const parsed = new Date(dateStr);
+        if(!isNaN(parsed.getTime())) {
+          return parsed.toLocaleDateString("en-US", { month: "long", day: "2-digit", year: "numeric" });
+        }
+      }
+      return dateStr;
+    }
+
     function autoFillTenant() {
       const addr = document.getElementById("propertyAddress").value;
       const match = propertyMap.find(p => p.address === addr);
@@ -621,7 +631,7 @@
         document.getElementById("tenantCnicDisplay").value = match.cnic;
         document.getElementById("tenantContactDisplay").value = match.contact;
         document.getElementById("tenantRentDisplay").value = match.monthlyRent;
-        document.getElementById("tenantLeaseEndDisplay").value = match.leaseEndDate || "-";
+        document.getElementById("tenantLeaseEndDisplay").value = formatDateDisplay(match.leaseEndDate);
         document.getElementById("partyName").value = match.tenantName;
       } else {
         clearTenantFields();
@@ -698,7 +708,6 @@
             rTitle2.innerText = "رسید بابت موصولی";
           }
 
-          // Dynamic label for Income/Rent vs Expense
           const partyLabel = isExpense ? "ادا شدہ رقم بنام:" : "وصول شدہ رقم از:";
 
           let contentHtml = `
