@@ -698,10 +698,13 @@
             rTitle2.innerText = "رسید بابت موصولی";
           }
 
+          // Dynamic label for Income/Rent vs Expense
+          const partyLabel = isExpense ? "ادا شدہ رقم بنام:" : "وصول شدہ رقم از:";
+
           let contentHtml = `
             <div class="receipt-row"><strong>تاریخ ٹرانزیکشن:</strong>&nbsp;${payload.date}</div>
             <div class="receipt-row"><strong>شعبہ / کیٹیگری:</strong>&nbsp;${payload.department} (${payload.category} / ${payload.subCategory})</div>
-            <div class="receipt-row"><strong>وصول شدہ رقم از:</strong>&nbsp;${payload.partyName} (${payload.partyType})</div>
+            <div class="receipt-row"><strong>${partyLabel}</strong>&nbsp;${payload.partyName} (${payload.partyType})</div>
             ${isRent ? `<div class="receipt-row"><strong>پراپرٹی ایڈریس:</strong>&nbsp;${payload.propertyAddress}</div><div class="receipt-row"><strong>کرایہ برائے ماہ:</strong>&nbsp;${payload.rentMonthYear}</div>` : ''}
             <div class="receipt-row"><strong>ادائیگی کا طریقہ:</strong>&nbsp;${payload.paymentMode}</div>
             <div class="receipt-row text-sm font-bold text-emerald-900 border-t border-b my-1 py-1"><strong>کل رقم:</strong>&nbsp;PKR ${payload.amount}/-</div>
