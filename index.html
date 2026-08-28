@@ -1,10 +1,25 @@
 <!DOCTYPE html>
-<html lang="ur" dir="rtl">
+<html lang="ur" dir="rtl" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام الشریعہ انٹری سسٹم</title>
+  <title>نظام الشریعہ پورٹل</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              800: '#065f46',
+              900: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Noto Nastaliq Urdu', serif, sans-serif; }
@@ -13,7 +28,6 @@
       max-height: 180px; 
       overflow-y: auto; 
       border: 1px solid #d1d5db;
-      background: #ffffff; 
       position: absolute; 
       top: 100%; 
       left: 0; 
@@ -24,64 +38,41 @@
     }
     .dropdown-item { padding: 8px 12px; cursor: pointer; direction: ltr; text-align: left; }
     .dropdown-item:hover { background-color: #f3f4f6; }
+    .dark .dropdown-item:hover { background-color: #374151; }
     select, input, textarea { direction: ltr; text-align: left; }
 
-    .receipt-copy {
-      line-height: 2.2 !important;
-    }
-    .receipt-row {
-      margin-bottom: 6px !important;
-      display: flex;
-      align-items: center;
-    }
-    .receipt-row-remarks {
-      margin-top: 6px !important;
-      line-height: 1.8 !important;
-    }
+    .receipt-copy { line-height: 2.2 !important; }
+    .receipt-row { margin-bottom: 6px !important; display: flex; align-items: center; }
+    .receipt-row-remarks { margin-top: 6px !important; line-height: 1.8 !important; }
 
     @media print {
-      @page {
-        size: A4 portrait;
-        margin: 5mm;
-      }
-      body * {
-        visibility: hidden;
-      }
-      #printableReceipt, #printableReceipt * {
-        visibility: visible;
-      }
+      @page { size: A4 portrait; margin: 5mm; }
+      body * { visibility: hidden; }
+      #printableReceipt, #printableReceipt * { visibility: visible; }
       #printableReceipt {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: block !important;
+        position: absolute; left: 0; top: 0; width: 100% !important; margin: 0 !important; padding: 0 !important; display: block !important;
       }
-      .receipt-copy {
-        box-shadow: none !important;
-      }
+      .receipt-copy { box-shadow: none !important; }
     }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-start p-2 sm:p-6">
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col items-center justify-start p-2 sm:p-6 transition-colors duration-200">
 
   <!-- Loader overlay -->
-  <div id="loader" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white p-6 rounded-lg shadow-xl text-center space-y-3">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-800 mx-auto"></div>
-      <p class="text-emerald-900 font-bold">برائے مہربانی انتظار کریں...</p>
+  <div id="loader" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl text-center space-y-3">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-800 dark:border-emerald-400 mx-auto"></div>
+      <p class="text-emerald-900 dark:text-emerald-300 font-bold">برائے مہربانی انتظار کریں...</p>
     </div>
   </div>
 
   <!-- Welcome Popup Modal -->
-  <div id="welcomeModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center border-2 border-emerald-600 space-y-4 relative">
-      <button onclick="closeWelcomeModal()" class="absolute top-3 left-3 text-gray-400 hover:text-gray-700 font-bold text-lg px-2">✕</button>
-      <div class="text-4xl text-emerald-800 font-bold mb-2">السلام علیکم</div>
-      <div id="modalUserName" class="text-2xl font-bold text-gray-800 border-b pb-3"></div>
-      <div class="text-emerald-900 font-semibold text-lg pt-2 leading-relaxed">
+  <div id="welcomeModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center border-2 border-emerald-600 space-y-4 relative">
+      <button onclick="closeWelcomeModal()" class="absolute top-3 left-3 text-gray-400 hover:text-gray-700 dark:hover:text-white font-bold text-lg px-2">✕</button>
+      <div class="text-4xl text-emerald-800 dark:text-emerald-400 font-bold mb-2">السلام علیکم</div>
+      <div id="modalUserName" class="text-2xl font-bold text-gray-800 dark:text-slate-200 border-b pb-3"></div>
+      <div class="text-emerald-900 dark:text-emerald-300 font-semibold text-lg pt-2 leading-relaxed">
         اللهم صل على محمد وآل محمد وعجل فرجهم
       </div>
       <div class="pt-4">
@@ -92,112 +83,130 @@
     </div>
   </div>
 
-  <!-- Header -->
-  <div class="w-full max-w-4xl bg-emerald-800 text-white p-4 rounded-t-xl shadow-lg flex justify-between items-center">
-    <div class="text-xl font-bold">نظام الشریعہ انٹری سسٹم</div>
-    <div id="userProfileArea" class="hidden relative">
-      <span id="welcomeMsg" class="text-sm font-semibold ml-4"></span>
-      <button onclick="toggleUserMenu()" class="bg-emerald-900 px-3 py-1 rounded text-sm hover:bg-emerald-700">⚙️ Options</button>
-      <div id="userMenu" class="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-xl hidden z-50 border">
-        <button onclick="showChangePassModal()" class="block w-full text-right px-4 py-2 text-sm hover:bg-gray-100 border-b">پاس ورڈ تبدیل کریں</button>
-        <button onclick="logout()" class="block w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100">لاگ آؤٹ</button>
+  <!-- Top Header -->
+  <div class="w-full max-w-6xl bg-emerald-800 dark:bg-slate-800 text-white p-4 rounded-t-xl shadow-lg flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <span class="text-xl font-bold">نظام الشریعہ انٹری پورٹل</span>
+      <button onclick="toggleTheme()" class="bg-emerald-900 dark:bg-slate-700 px-3 py-1 rounded-full text-xs font-semibold hover:bg-emerald-700 transition">
+        <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
+      </button>
+    </div>
+    <div id="userProfileArea" class="hidden relative flex items-center gap-2">
+      <span id="welcomeMsg" class="text-sm font-semibold ml-2"></span>
+      <button onclick="toggleUserMenu()" class="bg-emerald-900 dark:bg-slate-700 px-3 py-1 rounded text-sm hover:bg-emerald-700">⚙️ Options</button>
+      <div id="userMenu" class="absolute left-0 top-10 w-48 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 rounded shadow-xl hidden z-50 border border-slate-200 dark:border-slate-700">
+        <button onclick="showChangePassModal()" class="block w-full text-right px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 border-b border-slate-200 dark:border-slate-700">پاس ورڈ تبدیل کریں</button>
+        <button onclick="logout()" class="block w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-slate-700">لاگ آؤٹ</button>
       </div>
     </div>
   </div>
 
+  <!-- Main Navigation Tabs (Visible after Login) -->
+  <div id="navigationTabs" class="w-full max-w-6xl bg-emerald-900 dark:bg-slate-950 text-white flex border-b border-emerald-700 dark:border-slate-800 hidden">
+    <button onclick="switchTab('entryTab')" id="btn-entryTab" class="px-6 py-3 font-bold text-sm bg-emerald-700 dark:bg-slate-800 border-b-2 border-white">
+      📝 Transaction Entry
+    </button>
+    <button onclick="switchTab('propertiesTab')" id="btn-propertiesTab" class="px-6 py-3 font-bold text-sm hover:bg-emerald-800 dark:hover:bg-slate-900 border-b-2 border-transparent">
+      🏢 Properties & Tenants Details
+    </button>
+    <button onclick="switchTab('reportsTab')" id="btn-reportsTab" class="px-6 py-3 font-bold text-sm hover:bg-emerald-800 dark:hover:bg-slate-900 border-b-2 border-transparent">
+      📊 Reports
+    </button>
+  </div>
+
   <!-- Login Card -->
-  <div id="loginCard" class="bg-white p-8 rounded-b-xl shadow-lg w-full max-w-md">
-    <h2 class="text-xl font-bold text-center text-emerald-900 mb-6">لاگ ان کریں (Login)</h2>
+  <div id="loginCard" class="bg-white dark:bg-slate-800 p-8 rounded-b-xl shadow-lg w-full max-w-md">
+    <h2 class="text-xl font-bold text-center text-emerald-900 dark:text-emerald-400 mb-6">لاگ ان کریں (Login)</h2>
     <form onsubmit="handleLogin(event)" class="space-y-4">
       <div>
-        <label class="block text-gray-700 font-bold mb-1">یوزر نیم</label>
-        <input type="text" id="username" class="w-full p-2 border rounded" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">یوزر نیم</label>
+        <input type="text" id="username" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
       </div>
       <div>
-        <label class="block text-gray-700 font-bold mb-1">پاس ورڈ</label>
-        <input type="password" id="password" class="w-full p-2 border rounded" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">پاس ورڈ</label>
+        <input type="password" id="password" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
       </div>
       <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-2 rounded font-bold">لاگ ان</button>
       <div class="text-center mt-2">
-        <button type="button" onclick="handleForgotPass()" class="text-xs text-blue-600 underline">پاس ورڈ بھول گئے؟ (Forgot Password)</button>
+        <button type="button" onclick="handleForgotPass()" class="text-xs text-blue-600 dark:text-blue-400 underline">پاس ورڈ بھول گئے؟ (Forgot Password)</button>
       </div>
     </form>
   </div>
 
-  <!-- Main Entry Form -->
-  <div id="formCard" class="bg-white p-6 rounded-b-xl shadow-lg w-full max-w-4xl hidden space-y-4">
-    <h2 class="text-xl font-bold text-emerald-900 border-b pb-2">نئی ٹرانزیکشن انٹری</h2>
+  <!-- SCREEN 1: Main Entry Form -->
+  <div id="entryTab" class="tab-content bg-white dark:bg-slate-800 p-6 rounded-b-xl shadow-lg w-full max-w-6xl hidden space-y-4">
+    <h2 class="text-xl font-bold text-emerald-900 dark:text-emerald-400 border-b pb-2">نئی ٹرانزیکشن انٹری</h2>
     
     <form id="txnForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
       <div>
-        <label class="block text-gray-700 font-bold mb-1">1. تاریخ (Date)</label>
-        <input type="date" id="txnDate" class="w-full p-2 border rounded" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">1. تاریخ (Date)</label>
+        <input type="date" id="txnDate" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
       </div>
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">2. شعبہ (Department)</label>
-        <select id="department" class="w-full p-2 border rounded" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">2. شعبہ (Department)</label>
+        <select id="department" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
           <option value="">Select Department</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">3. ٹرانزیکشن ٹائپ (Txn Type)</label>
-        <select id="txnType" onchange="onTxnTypeChange()" class="w-full p-2 border rounded" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">3. ٹرانزیکشن ٹائپ (Txn Type)</label>
+        <select id="txnType" onchange="onTxnTypeChange()" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
           <option value="">Select Txn Type</option>
         </select>
       </div>
 
       <div id="categoryContainer">
-        <label class="block text-gray-700 font-bold mb-1">4. کیٹیگری (Category) <span id="catRequiredStar" class="text-red-500 hidden">*</span></label>
-        <select id="categorySelect" onchange="onCategoryChange()" class="w-full p-2 border rounded">
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">4. کیٹیگری (Category) <span id="catRequiredStar" class="text-red-500 hidden">*</span></label>
+        <select id="categorySelect" onchange="onCategoryChange()" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white">
           <option value="">Select Category</option>
         </select>
       </div>
 
       <div class="search-box">
-        <label class="block text-gray-700 font-bold mb-1">5. ذیلی کیٹیگری (Sub Category)</label>
-        <input type="text" id="subCategorySearch" placeholder="Type to search Sub Category..." oninput="filterSubCatSearch()" onfocus="showSubCatList()" class="w-full p-2 border rounded" autocomplete="off" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">5. ذیلی کیٹیگری (Sub Category)</label>
+        <input type="text" id="subCategorySearch" placeholder="Type to search Sub Category..." oninput="filterSubCatSearch()" onfocus="showSubCatList()" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" autocomplete="off" required>
         <input type="hidden" id="subCategory">
         <input type="hidden" id="category">
-        <div id="subCatList" class="dropdown-list shadow-md rounded"></div>
+        <div id="subCatList" class="dropdown-list shadow-md rounded bg-white dark:bg-slate-800 border dark:border-slate-600"></div>
       </div>
 
       <!-- Rental Section -->
-      <div id="rentalFields" class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 bg-emerald-50 p-4 rounded-lg border border-emerald-200 hidden">
+      <div id="rentalFields" class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 bg-emerald-50 dark:bg-slate-700/50 p-4 rounded-lg border border-emerald-200 dark:border-slate-600 hidden">
         <div>
-          <label class="block text-emerald-900 font-bold mb-1">پراپرٹی ایڈریس (Address)</label>
-          <select id="propertyAddress" onchange="autoFillTenant()" class="w-full p-2 border rounded">
+          <label class="block text-emerald-900 dark:text-emerald-300 font-bold mb-1">پراپرٹی ایڈریس (Address)</label>
+          <select id="propertyAddress" onchange="autoFillTenant()" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white">
             <option value="">Select Address</option>
           </select>
         </div>
         <div>
-          <label class="block text-emerald-900 font-bold mb-1">کرایہ دار (Tenant Name)</label>
-          <input type="text" id="tenantNameDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Tenant">
+          <label class="block text-emerald-900 dark:text-emerald-300 font-bold mb-1">کرایہ دار (Tenant Name)</label>
+          <input type="text" id="tenantNameDisplay" class="w-full p-2 border rounded bg-gray-100 dark:bg-slate-600 dark:text-white" readonly placeholder="Auto Tenant">
         </div>
         <div>
-          <label class="block text-emerald-900 font-bold mb-1">ولدیت (Father Name)</label>
-          <input type="text" id="tenantFatherDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Father">
+          <label class="block text-emerald-900 dark:text-emerald-300 font-bold mb-1">ولدیت (Father Name)</label>
+          <input type="text" id="tenantFatherDisplay" class="w-full p-2 border rounded bg-gray-100 dark:bg-slate-600 dark:text-white" readonly placeholder="Auto Father">
         </div>
         <div>
-          <label class="block text-emerald-900 font-bold mb-1">CNIC</label>
-          <input type="text" id="tenantCnicDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto CNIC">
+          <label class="block text-emerald-900 dark:text-emerald-300 font-bold mb-1">CNIC</label>
+          <input type="text" id="tenantCnicDisplay" class="w-full p-2 border rounded bg-gray-100 dark:bg-slate-600 dark:text-white" readonly placeholder="Auto CNIC">
         </div>
         <div>
-          <label class="block text-emerald-900 font-bold mb-1">Contact</label>
-          <input type="text" id="tenantContactDisplay" class="w-full p-2 border rounded bg-gray-100" readonly placeholder="Auto Contact">
+          <label class="block text-emerald-900 dark:text-emerald-300 font-bold mb-1">Contact</label>
+          <input type="text" id="tenantContactDisplay" class="w-full p-2 border rounded bg-gray-100 dark:bg-slate-600 dark:text-white" readonly placeholder="Auto Contact">
         </div>
         <div>
-          <label class="block text-emerald-900 font-bold mb-1">ماہانہ طے شدہ کرایہ</label>
-          <input type="text" id="tenantRentDisplay" class="w-full p-2 border rounded bg-gray-100 font-bold text-emerald-800" readonly placeholder="0">
+          <label class="block text-emerald-900 dark:text-emerald-300 font-bold mb-1">ماہانہ طے شدہ کرایہ</label>
+          <input type="text" id="tenantRentDisplay" class="w-full p-2 border rounded bg-gray-100 dark:bg-slate-600 font-bold text-emerald-800 dark:text-emerald-400" readonly placeholder="0">
         </div>
         <div>
-          <label class="block text-emerald-900 font-bold mb-1">معاہدہ کی آخری تاریخ (Lease End)</label>
-          <input type="text" id="tenantLeaseEndDisplay" class="w-full p-2 border rounded bg-gray-100 font-bold text-red-700" readonly placeholder="Auto Lease End">
+          <label class="block text-emerald-900 dark:text-emerald-300 font-bold mb-1">معاہدہ کی آخری تاریخ (Lease End)</label>
+          <input type="text" id="tenantLeaseEndDisplay" class="w-full p-2 border rounded bg-gray-100 dark:bg-slate-600 font-bold text-red-700 dark:text-red-400" readonly placeholder="Auto Lease End">
         </div>
         <div>
-          <label class="block text-emerald-900 font-bold mb-1">کرایہ کا مہینہ (Month)</label>
-          <select id="rentMonth" class="w-full p-2 border rounded">
+          <label class="block text-emerald-900 dark:text-emerald-300 font-bold mb-1">کرایہ کا مہینہ (Month)</label>
+          <select id="rentMonth" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white">
             <option value="">Select Month</option>
             <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
             <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
@@ -206,43 +215,43 @@
           </select>
         </div>
         <div>
-          <label class="block text-emerald-900 font-bold mb-1">سال (Year)</label>
-          <input type="number" id="rentYear" min="2000" max="2100" placeholder="e.g. 2026" class="w-full p-2 border rounded" value="2026">
+          <label class="block text-emerald-900 dark:text-emerald-300 font-bold mb-1">سال (Year)</label>
+          <input type="number" id="rentYear" min="2000" max="2100" placeholder="e.g. 2026" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" value="2026">
         </div>
       </div>
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">فون نمبر / Donor Search</label>
-        <input type="text" id="contactNo" onblur="lookupDonor()" class="w-full p-2 border rounded" placeholder="Type phone for Donor search">
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">فون نمبر / Donor Search</label>
+        <input type="text" id="contactNo" onblur="lookupDonor()" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="Type phone for Donor search">
       </div>
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">پارٹی ٹائپ (Party Type)</label>
-        <select id="partyType" class="w-full p-2 border rounded" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">پارٹی ٹائپ (Party Type)</label>
+        <select id="partyType" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
           <option value="">Select Party Type</option>
         </select>
       </div>
 
       <div class="md:col-span-2">
-        <label class="block text-gray-700 font-bold mb-1">شخص / پارٹی کا نام (Name)</label>
-        <input type="text" id="partyName" class="w-full p-2 border rounded" placeholder="Person / Party / Donor Name" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">شخص / پارٹی کا نام (Name)</label>
+        <input type="text" id="partyName" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="Person / Party / Donor Name" required>
       </div>
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">ادائیگی کا طریقہ (Payment Mode)</label>
-        <select id="paymentMode" class="w-full p-2 border rounded" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">ادائیگی کا طریقہ (Payment Mode)</label>
+        <select id="paymentMode" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
           <option value="">Select Mode</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-gray-700 font-bold mb-1">رقم (Amount PKR)</label>
-        <input type="number" id="amount" class="w-full p-2 border rounded" required>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">رقم (Amount PKR)</label>
+        <input type="number" id="amount" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
       </div>
 
       <div class="md:col-span-2">
-        <label class="block text-gray-700 font-bold mb-1">تفصیل / ریمارکس (Remarks)</label>
-        <textarea id="remarks" class="w-full p-2 border rounded" rows="2"></textarea>
+        <label class="block text-gray-700 dark:text-slate-300 font-bold mb-1">تفصیل / ریمارکس (Remarks)</label>
+        <textarea id="remarks" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" rows="2"></textarea>
       </div>
 
       <div class="md:col-span-2 grid grid-cols-2 gap-4 mt-2">
@@ -252,16 +261,159 @@
     </form>
   </div>
 
+  <!-- SCREEN 2: Properties & Tenants Details -->
+  <div id="propertiesTab" class="tab-content bg-white dark:bg-slate-800 p-6 rounded-b-xl shadow-lg w-full max-w-6xl hidden space-y-4">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-b pb-4 dark:border-slate-700">
+      <h2 class="text-xl font-bold text-emerald-900 dark:text-emerald-400">Properties & Tenants Management</h2>
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <input type="text" id="propSearchInput" oninput="filterPropertiesTable()" placeholder="Search by Address, Tenant, CNIC..." class="p-2 border rounded w-full sm:w-64 text-sm dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+        <button onclick="openAddPropertyModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded font-bold text-sm whitespace-nowrap shadow">+ Add New Property</button>
+      </div>
+    </div>
+
+    <!-- Properties Data Table -->
+    <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+      <table class="w-full text-right text-xs sm:text-sm">
+        <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold">
+          <tr>
+            <th class="p-3 text-left">Property Address</th>
+            <th class="p-3">Type</th>
+            <th class="p-3">Tenant Name</th>
+            <th class="p-3">Contact</th>
+            <th class="p-3">Monthly Rent</th>
+            <th class="p-3">Status</th>
+            <th class="p-3 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="propertiesTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Reports Placeholder -->
+  <div id="reportsTab" class="tab-content bg-white dark:bg-slate-800 p-8 rounded-b-xl shadow-lg w-full max-w-6xl hidden text-center space-y-4">
+    <div class="text-5xl">📊</div>
+    <h2 class="text-2xl font-bold text-slate-700 dark:text-slate-200">Reports Screen (Coming Soon)</h2>
+    <p class="text-slate-500 dark:text-slate-400">Yeh screen aage ja kar aap ki zaroorat ke mutabiq customize ki jayegi.</p>
+  </div>
+
+  <!-- Add / Edit Property Modal -->
+  <div id="propertyModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-w-3xl w-full text-right space-y-4 border border-slate-200 dark:border-slate-700 my-8">
+      <div class="flex justify-between items-center border-b pb-3 dark:border-slate-700">
+        <h3 id="propModalTitle" class="text-lg font-bold text-emerald-900 dark:text-emerald-400">Add New Property</h3>
+        <button onclick="closePropertyModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white font-bold text-xl">✕</button>
+      </div>
+      
+      <form id="propForm" onsubmit="handlePropertySubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <input type="hidden" id="propIsEdit" value="false">
+        <input type="hidden" id="propOriginalAddress" value="">
+
+        <div>
+          <label class="block text-xs font-bold mb-1">Property Address *</label>
+          <input type="text" id="pAddress" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1">Property Type *</label>
+          <select id="pType" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+            <option value="">Select Type</option>
+            <option value="Shop">Shop</option>
+            <option value="Doctor Chamber">Doctor Chamber</option>
+            <option value="House">House</option>
+            <option value="Flat">Flat</option>
+            <option value="Plot">Plot</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1">Property Status *</label>
+          <select id="pStatus" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+            <option value="Rented">Rented</option>
+            <option value="Vacant">Vacant</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-1">Lease Start Date *</label>
+          <input type="date" id="pLeaseStart" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1">Lease End Date *</label>
+          <input type="date" id="pLeaseEnd" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1">Tenant Name *</label>
+          <input type="text" id="pTenantName" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-1">Tenant Father Name *</label>
+          <input type="text" id="pTenantFather" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1">Tenant CNIC *</label>
+          <input type="text" id="pTenantCnic" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="42101-XXXXXXX-X" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1">Tenant Contact *</label>
+          <input type="text" id="pTenantContact" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="03XXXXXXXXX" required>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-1">Rent Per Month *</label>
+          <input type="number" id="pRentPerMonth" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1">Security Deposit *</label>
+          <input type="number" id="pSecurityDeposit" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1">Contract Number *</label>
+          <input type="text" id="pContractNo" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+        </div>
+
+        <div class="sm:col-span-2 md:col-span-3">
+          <label class="block text-xs font-bold mb-1">Contract Status *</label>
+          <select id="pContractStatus" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white" required>
+            <option value="Active">Active</option>
+            <option value="Expired">Expired</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+
+        <div class="sm:col-span-2 md:col-span-3 flex justify-end gap-3 pt-3 border-t dark:border-slate-700">
+          <button type="button" onclick="closePropertyModal()" class="px-4 py-2 bg-gray-300 dark:bg-slate-600 text-gray-800 dark:text-white rounded font-bold">کینسل</button>
+          <button type="submit" class="px-6 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded font-bold">محفوظ کریں (Save)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Details Modal -->
+  <div id="viewModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-w-xl w-full text-right space-y-4 border border-slate-200 dark:border-slate-700">
+      <div class="flex justify-between items-center border-b pb-3 dark:border-slate-700">
+        <h3 class="text-lg font-bold text-emerald-900 dark:text-emerald-400">Property & Tenant Details</h3>
+        <button onclick="closeViewModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white font-bold text-xl">✕</button>
+      </div>
+      <div id="viewModalContent" class="space-y-2 text-xs sm:text-sm"></div>
+      <div class="text-left border-t pt-3 dark:border-slate-700">
+        <button onclick="closeViewModal()" class="px-4 py-1.5 bg-emerald-800 text-white rounded font-bold">بند کریں</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Change Password Modal -->
-  <div id="changePassModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm space-y-4 text-right">
-      <h3 class="text-lg font-bold border-b pb-2">پاس ورڈ تبدیل کریں</h3>
+  <div id="changePassModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-sm space-y-4 text-right border dark:border-slate-700">
+      <h3 class="text-lg font-bold border-b pb-2 dark:border-slate-700">پاس ورڈ تبدیل کریں</h3>
       <div>
         <label class="block text-xs font-bold mb-1">نیا پاس ورڈ</label>
-        <input type="password" id="newPassword" class="w-full p-2 border rounded">
+        <input type="password" id="newPassword" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-white">
       </div>
       <div class="flex justify-end gap-2">
-        <button onclick="hideChangePassModal()" class="px-3 py-1 bg-gray-300 rounded">کینسل</button>
+        <button onclick="hideChangePassModal()" class="px-3 py-1 bg-gray-300 dark:bg-slate-600 rounded">کینسل</button>
         <button onclick="submitNewPassword()" class="px-3 py-1 bg-emerald-700 text-white rounded">اپڈیٹ کریں</button>
       </div>
     </div>
@@ -324,11 +476,36 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhPqsZzXd3G_UlmgoiMA814M_tSHOUD-yWTelEYo1TtloIMhYCoT7grP0SVfA_TcxhlA/exec";
-    let allMappings = [], filteredMappings = [], propertyMap = [], currentUser = "", activeUsername = "";
+    let allMappings = [], filteredMappings = [], propertyMap = [], propertiesFullData = [];
+    let currentUser = "", activeUsername = "";
     let welcomeTimer = null, timerInterval = null;
+
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      const isDark = htmlEl.classList.toggle('dark');
+      document.getElementById("themeIcon").innerText = isDark ? "☀️" : "🌙";
+      document.getElementById("themeText").innerText = isDark ? "Light Mode" : "Dark Mode";
+    }
 
     function showLoader() { document.getElementById("loader").classList.remove("hidden"); }
     function hideLoader() { document.getElementById("loader").classList.add("hidden"); }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#navigationTabs button').forEach(btn => {
+        btn.classList.remove('bg-emerald-700', 'dark:bg-slate-800', 'border-white');
+        btn.classList.add('border-transparent');
+      });
+
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('btn-' + tabId);
+      activeBtn.classList.add('bg-emerald-700', 'dark:bg-slate-800', 'border-white');
+      activeBtn.classList.remove('border-transparent');
+
+      if (tabId === 'propertiesTab') {
+        loadAllProperties();
+      }
+    }
 
     async function handleLogin(e) {
       e.preventDefault();
@@ -347,7 +524,8 @@
           document.getElementById("welcomeMsg").innerText = `السلام علیکم، ${currentUser}`;
           document.getElementById("userProfileArea").classList.remove("hidden");
           document.getElementById("loginCard").classList.add("hidden");
-          document.getElementById("formCard").classList.remove("hidden");
+          document.getElementById("navigationTabs").classList.remove("hidden");
+          document.getElementById("entryTab").classList.remove("hidden");
           document.getElementById("txnDate").valueAsDate = new Date();
           
           showWelcomePopup(currentUser);
@@ -373,9 +551,7 @@
         }
       }, 1000);
 
-      welcomeTimer = setTimeout(() => {
-        closeWelcomeModal();
-      }, 5000);
+      welcomeTimer = setTimeout(() => { closeWelcomeModal(); }, 5000);
     }
 
     function closeWelcomeModal() {
@@ -437,6 +613,199 @@
       } catch(e) {
         hideLoader();
         alert("Settings load karne mein masla aya!");
+      }
+    }
+
+    async function loadAllProperties() {
+      showLoader();
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getAllProperties`);
+        const data = await res.json();
+        hideLoader();
+        if (data.status === "success") {
+          propertiesFullData = data.data || [];
+          renderPropertiesTable(propertiesFullData);
+        }
+      } catch (e) {
+        hideLoader();
+        alert("Properties data load nahi ho saka!");
+      }
+    }
+
+    function renderPropertiesTable(dataList) {
+      const tbody = document.getElementById("propertiesTableBody");
+      tbody.innerHTML = "";
+
+      if (dataList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-500">Koi record nahi mila.</td></tr>`;
+        return;
+      }
+
+      dataList.forEach((item, index) => {
+        let tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50 dark:hover:bg-slate-700/50 transition";
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-left text-emerald-900 dark:text-emerald-400" dir="ltr">${item.propertyAddress}</td>
+          <td class="p-3">${item.propertyType}</td>
+          <td class="p-3">${item.tenantName}</td>
+          <td class="p-3" dir="ltr">${item.tenantContact}</td>
+          <td class="p-3 font-bold" dir="ltr">PKR ${Number(item.rentPerMonth).toLocaleString()}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-bold ${item.propertyStatus === 'Rented' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300'}">${item.propertyStatus}</span></td>
+          <td class="p-3 text-center">
+            <div class="flex justify-center items-center gap-2">
+              <button onclick="viewProperty(${index})" title="View Details" class="p-1 text-blue-600 hover:text-blue-800 text-base">ℹ️</button>
+              <button onclick="editProperty(${index})" title="Edit Property" class="p-1 text-amber-600 hover:text-amber-800 text-base">✏️</button>
+              <button onclick="deleteProperty('${item.propertyAddress}')" title="Delete Property" class="p-1 text-red-600 hover:text-red-800 text-base">🗑️</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterPropertiesTable() {
+      const q = document.getElementById("propSearchInput").value.toLowerCase();
+      const filtered = propertiesFullData.filter(p => 
+        p.propertyAddress.toLowerCase().includes(q) ||
+        p.tenantName.toLowerCase().includes(q) ||
+        p.tenantCnic.toLowerCase().includes(q) ||
+        p.tenantContact.toLowerCase().includes(q)
+      );
+      renderPropertiesTable(filtered);
+    }
+
+    function openAddPropertyModal() {
+      document.getElementById("propModalTitle").innerText = "Add New Property";
+      document.getElementById("propIsEdit").value = "false";
+      document.getElementById("propOriginalAddress").value = "";
+      document.getElementById("propForm").reset();
+      document.getElementById("propertyModal").classList.remove("hidden");
+    }
+
+    function closePropertyModal() { document.getElementById("propertyModal").classList.add("hidden"); }
+
+    function editProperty(index) {
+      const item = propertiesFullData[index];
+      if (!item) return;
+
+      document.getElementById("propModalTitle").innerText = "Edit Property Details";
+      document.getElementById("propIsEdit").value = "true";
+      document.getElementById("propOriginalAddress").value = item.propertyAddress;
+
+      document.getElementById("pAddress").value = item.propertyAddress;
+      document.getElementById("pType").value = item.propertyType;
+      document.getElementById("pStatus").value = item.propertyStatus;
+      document.getElementById("pLeaseStart").value = item.leaseStartDate;
+      document.getElementById("pLeaseEnd").value = item.leaseEndDate;
+      document.getElementById("pTenantName").value = item.tenantName;
+      document.getElementById("pTenantFather").value = item.tenantFatherName;
+      document.getElementById("pTenantCnic").value = item.tenantCnic;
+      document.getElementById("pTenantContact").value = item.tenantContact;
+      document.getElementById("pRentPerMonth").value = item.rentPerMonth;
+      document.getElementById("pSecurityDeposit").value = item.securityDeposit;
+      document.getElementById("pContractNo").value = item.contractNumber;
+      document.getElementById("pContractStatus").value = item.contractStatus;
+
+      document.getElementById("propertyModal").classList.remove("hidden");
+    }
+
+    function viewProperty(index) {
+      const item = propertiesFullData[index];
+      if (!item) return;
+
+      const html = `
+        <div class="grid grid-cols-2 gap-2 border-b pb-2 dark:border-slate-700">
+          <div><strong>Address:</strong> ${item.propertyAddress}</div>
+          <div><strong>Type:</strong> ${item.propertyType}</div>
+          <div><strong>Status:</strong> ${item.propertyStatus}</div>
+          <div><strong>Monthly Rent:</strong> PKR ${Number(item.rentPerMonth).toLocaleString()}</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 border-b pb-2 dark:border-slate-700">
+          <div><strong>Tenant Name:</strong> ${item.tenantName}</div>
+          <div><strong>Father Name:</strong> ${item.tenantFatherName}</div>
+          <div><strong>CNIC:</strong> ${item.tenantCnic}</div>
+          <div><strong>Contact:</strong> ${item.tenantContact}</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 border-b pb-2 dark:border-slate-700">
+          <div><strong>Lease Start:</strong> ${item.leaseStartDate}</div>
+          <div><strong>Lease End:</strong> ${item.leaseEndDate}</div>
+          <div><strong>Security Deposit:</strong> PKR ${Number(item.securityDeposit).toLocaleString()}</div>
+          <div><strong>Contract No:</strong> ${item.contractNumber} (${item.contractStatus})</div>
+        </div>
+      `;
+      document.getElementById("viewModalContent").innerHTML = html;
+      document.getElementById("viewModal").classList.remove("hidden");
+    }
+
+    function closeViewModal() { document.getElementById("viewModal").classList.add("hidden"); }
+
+    async function handlePropertySubmit(e) {
+      e.preventDefault();
+      const isEdit = document.getElementById("propIsEdit").value === "true";
+      
+      const payload = {
+        action: isEdit ? "updateProperty" : "addProperty",
+        originalAddress: document.getElementById("propOriginalAddress").value,
+        propertyAddress: document.getElementById("pAddress").value,
+        propertyType: document.getElementById("pType").value,
+        propertyStatus: document.getElementById("pStatus").value,
+        leaseStartDate: document.getElementById("pLeaseStart").value,
+        leaseEndDate: document.getElementById("pLeaseEnd").value,
+        tenantName: document.getElementById("pTenantName").value,
+        tenantFatherName: document.getElementById("pTenantFather").value,
+        tenantCnic: document.getElementById("pTenantCnic").value,
+        tenantContact: document.getElementById("pTenantContact").value,
+        rentPerMonth: document.getElementById("pRentPerMonth").value,
+        securityDeposit: document.getElementById("pSecurityDeposit").value,
+        contractNumber: document.getElementById("pContractNo").value,
+        contractStatus: document.getElementById("pContractStatus").value,
+        username: activeUsername
+      };
+
+      showLoader();
+      try {
+        const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+        const data = await res.json();
+        hideLoader();
+
+        if (data.status === "success") {
+          alert(isEdit ? "Property kamyabi se update ho gayi!" : "Nayi Property kamyabi se add ho gayi!");
+          closePropertyModal();
+          loadAllProperties();
+          loadFormOptions(); // Refresh options for transaction entry dropdowns
+        } else if (data.status === "duplicate") {
+          alert("Error: " + data.message);
+        } else {
+          alert("Error processing request: " + (data.message || "Unknown error"));
+        }
+      } catch (err) {
+        hideLoader();
+        alert("Server error processing request!");
+      }
+    }
+
+    async function deleteProperty(address) {
+      if (!confirm(`Kya aap xaqeenan property '${address}' ko delete karna chahte hain? Yeh Trash Properties sheet mein move ho jayegi.`)) return;
+
+      showLoader();
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "deleteProperty", propertyAddress: address, username: activeUsername })
+        });
+        const data = await res.json();
+        hideLoader();
+
+        if (data.status === "success") {
+          alert("Property Trash Properties sheet mein move ho gayi aur main list se remove kar di gayi!");
+          loadAllProperties();
+          loadFormOptions();
+        } else {
+          alert("Delete karne mein masla aya: " + data.message);
+        }
+      } catch (e) {
+        hideLoader();
+        alert("Server request failed!");
       }
     }
 
